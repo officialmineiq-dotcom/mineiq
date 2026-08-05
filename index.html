@@ -902,6 +902,10 @@
         <div class="stat-label">Fuel Today</div>
         <div class="stat-value" id="statFuel">0<span class="unit">L</span></div>
       </div>
+      <div class="stat-card" style="--stat-color:#3a6ea5">
+        <div class="stat-label">Sales Today</div>
+        <div class="stat-value" id="statSales">0<span class="unit">T</span></div>
+      </div>
       <div class="stat-card" style="--stat-color:#3c8f8a">
         <div class="stat-label">Safety Score</div>
         <div class="stat-value" id="statSafety">—</div>
@@ -927,6 +931,11 @@
         <div class="module-icon">📔</div>
         <div class="module-title">Mine Diary</div>
         <div class="module-desc">Daily production, manpower, fuel & breakdown log.</div>
+      </div>
+      <div class="module-tile" style="--tile-color:#3a6ea5" data-view="sales">
+        <div class="module-icon">💰</div>
+        <div class="module-title">Sales</div>
+        <div class="module-desc">Record dispatched material and tonnage by date.</div>
       </div>
       <div class="module-tile" style="--tile-color:#6b5b95" data-view="equipment">
         <div class="module-icon">🚜</div>
@@ -957,6 +966,10 @@
     <div class="card trend-card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Production Trend <span style="font-size:11px; color:var(--slate-500); font-family:var(--font-mono); text-transform:none;">(last 7 diary entries)</span></h3>
       <div class="trend-bars" id="trendBars"></div>
+    </div>
+    <div class="card trend-card">
+      <h3 style="font-family:var(--font-display); margin-top:0;">Sales Trend <span style="font-size:11px; color:var(--slate-500); font-family:var(--font-mono); text-transform:none;">(last 7 sales entries)</span></h3>
+      <div class="trend-bars" id="salesTrendBars"></div>
     </div>
   </div>
 
@@ -1313,6 +1326,31 @@
     <div class="card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Recent Entries</h3>
       <div id="diaryList"></div>
+    </div>
+  </div>
+
+  <!-- SALES -->
+  <div class="view" id="view-sales">
+    <div class="view-header"><h2>Sales</h2><span class="badge">Dispatch Log</span></div>
+    <div class="card">
+      <h3 style="font-family:var(--font-display); margin-top:0;">Add Sales Entry</h3>
+      <div class="form-row">
+        <div>
+          <label>Date</label>
+          <input type="date" id="salesDate">
+        </div>
+        <div>
+          <label>Material</label>
+          <input type="text" id="salesMaterial" placeholder="e.g. Granite aggregate">
+        </div>
+      </div>
+      <label>Tonnage</label>
+      <input type="text" inputmode="decimal" id="salesTonnage" placeholder="e.g. 480">
+      <button class="action" onclick="addSalesEntry()">Save Sales Entry</button>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--font-display); margin-top:0;">Recent Sales</h3>
+      <div id="salesList"></div>
     </div>
   </div>
 
@@ -2060,7 +2098,7 @@ async function syncToCloud() {
   try {
     await ref.set({
       checklist, weeklyChecklist, monthlyChecklist,
-      diaryEntries, equipment, explosiveRecords, incidents,
+      diaryEntries, salesEntries, equipment, explosiveRecords, incidents,
       updatedAt: new Date().toISOString()
     }, { merge: true });
     setCloudStatusText('☁ Synced', false);
@@ -2080,24 +2118,27 @@ async function loadFromCloud() {
     const doc = await ref.get();
     if (doc.exists) {
       const data = doc.data();
-      checklist = data.checklist || defaultChecklist;
-      weeklyChecklist = data.weeklyChecklist || defaultWeeklyChecklist;
-      monthlyChecklist = data.monthlyChecklist || defaultMonthlyChecklist;
-      diaryEntries = data.diaryEntries || [];
-      equipment = data.equipment || [];
-      explosiveRecords = data.explosiveRecords || [];
-      incidents = data.incidents || [];
+      checklist = data.checklist ? validRecordArray(data.checklist, 'Checklist') : defaultChecklist;
+      weeklyChecklist = data.weeklyChecklist ? validRecordArray(data.weeklyChecklist, 'Weekly checklist') : defaultWeeklyChecklist;
+      monthlyChecklist = data.monthlyChecklist ? validRecordArray(data.monthlyChecklist, 'Monthly checklist') : defaultMonthlyChecklist;
+      diaryEntries = data.diaryEntries ? validRecordArray(data.diaryEntries, 'Diary') : [];
+      salesEntries = data.salesEntries ? validRecordArray(data.salesEntries, 'Sales') : [];
+      equipment = data.equipment ? validRecordArray(data.equipment, 'Equipment') : [];
+      explosiveRecords = data.explosiveRecords ? validRecordArray(data.explosiveRecords, 'Explosive records') : [];
+      incidents = data.incidents ? validRecordArray(data.incidents, 'Incidents') : [];
 
       localStorage.setItem('mineiq-checklist', JSON.stringify(checklist));
       localStorage.setItem('mineiq-checklist-weekly', JSON.stringify(weeklyChecklist));
       localStorage.setItem('mineiq-checklist-monthly', JSON.stringify(monthlyChecklist));
       localStorage.setItem('mineiq-diary', JSON.stringify(diaryEntries));
+      localStorage.setItem('mineiq-sales', JSON.stringify(salesEntries));
       localStorage.setItem('mineiq-equipment', JSON.stringify(equipment));
       localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
       localStorage.setItem('mineiq-incidents', JSON.stringify(incidents));
 
       renderChecklist();
       renderDiary();
+      renderSales();
       renderEquipment();
       renderExplosiveRecords();
       renderIncidents();
@@ -2385,6 +2426,32 @@ let weeklyChecklist = [];
 let monthlyChecklist = [];
 let currentChecklistPeriod = 'daily';
 
+// User data is displayed in several records. Keep it as text, never markup.
+// This prevents a saved/imported value from executing code in the app.
+function escapeHTML(value) {
+  const element = document.createElement('span');
+  element.textContent = String(value ?? '');
+  return element.innerHTML;
+}
+
+function readNonNegativeNumber(elementId, label, { required = true, allowZero = true } = {}) {
+  const raw = document.getElementById(elementId).value.trim();
+  if (!raw && !required) return '';
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0 || (!allowZero && value === 0)) {
+    alert(`${label} must be a ${allowZero ? 'non-negative' : 'positive'} number.`);
+    return null;
+  }
+  return String(value);
+}
+
+function validRecordArray(value, name) {
+  if (!Array.isArray(value) || value.length > 10000 || value.some(record => !record || typeof record !== 'object' || Array.isArray(record))) {
+    throw new Error(`${name} is not a valid record list.`);
+  }
+  return value;
+}
+
 const CHECKLIST_CONFIG = {
   daily:   { key: 'mineiq-checklist',         default: defaultChecklist,         title: 'Daily Checklist' },
   weekly:  { key: 'mineiq-checklist-weekly',  default: defaultWeeklyChecklist,   title: 'Weekly Checklist' },
@@ -2438,7 +2505,7 @@ function renderChecklist() {
     row.innerHTML = `
       <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-family:var(--font-body); font-size:14px; color:var(--slate-900); margin:0;">
         <input type="checkbox" ${item.done ? 'checked' : ''} style="width:16px;height:16px;">
-        ${item.text}
+        ${escapeHTML(item.text)}
       </label>
     `;
     row.querySelector('input').addEventListener('change', async (e) => {
@@ -2470,7 +2537,14 @@ function addIncident() {
   const location = document.getElementById('incidentLocation').value.trim();
   const desc = document.getElementById('incidentDesc').value.trim();
   const action = document.getElementById('incidentAction').value.trim();
-  if (!desc) return;
+  if (!desc) {
+    alert('Please enter an incident description.');
+    return;
+  }
+  if ([location, desc, action].some(value => value.length > 2000)) {
+    alert('Incident fields must be 2,000 characters or fewer.');
+    return;
+  }
   incidents.unshift({ date, type, location, desc, action });
   localStorage.setItem('mineiq-incidents', JSON.stringify(incidents));
   showSaved();
@@ -2494,11 +2568,11 @@ function renderIncidents() {
     row.style.display = 'block';
     row.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <strong>${item.date}${item.location ? ' — ' + item.location : ''}</strong>
-        <span class="status-pill ${pillClass}">${item.type}</span>
+        <strong>${escapeHTML(item.date)}${item.location ? ' — ' + escapeHTML(item.location) : ''}</strong>
+        <span class="status-pill ${pillClass}">${escapeHTML(item.type)}</span>
       </div>
-      <div class="meta" style="font-family:var(--font-body); font-size:13px; color:var(--slate-700);">${item.desc}</div>
-      ${item.action ? `<div class="meta" style="margin-top:2px;">Action: ${item.action}</div>` : ''}
+      <div class="meta" style="font-family:var(--font-body); font-size:13px; color:var(--slate-700);">${escapeHTML(item.desc)}</div>
+      ${item.action ? `<div class="meta" style="margin-top:2px;">Action: ${escapeHTML(item.action)}</div>` : ''}
     `;
     container.appendChild(row);
   });
@@ -2520,10 +2594,15 @@ async function loadDiary() {
 
 async function addDiaryEntry() {
   const date = document.getElementById('diaryDate').value || todayString();
-  const production = document.getElementById('diaryProduction').value || '0';
-  const manpower = document.getElementById('diaryManpower').value || '0';
-  const fuel = document.getElementById('diaryFuel').value || '0';
-  const notes = document.getElementById('diaryNotes').value || '';
+  const production = readNonNegativeNumber('diaryProduction', 'Production');
+  const manpower = readNonNegativeNumber('diaryManpower', 'Manpower');
+  const fuel = readNonNegativeNumber('diaryFuel', 'Fuel used');
+  const notes = document.getElementById('diaryNotes').value.trim();
+  if ([production, manpower, fuel].includes(null)) return;
+  if (notes.length > 2000) {
+    alert('Notes must be 2,000 characters or fewer.');
+    return;
+  }
 
   diaryEntries.unshift({ date, production, manpower, fuel, notes });
   localStorage.setItem('mineiq-diary', JSON.stringify(diaryEntries));
@@ -2548,10 +2627,63 @@ function renderDiary() {
     row.className = 'list-row';
     row.innerHTML = `
       <div>
-        <strong>${entry.date}</strong> — ${entry.production} t, ${entry.manpower} workers, ${entry.fuel} L fuel
-        ${entry.notes ? `<div class="meta">${entry.notes}</div>` : ''}
+        <strong>${escapeHTML(entry.date)}</strong> — ${escapeHTML(entry.production)} t, ${escapeHTML(entry.manpower)} workers, ${escapeHTML(entry.fuel)} L fuel
+        ${entry.notes ? `<div class="meta">${escapeHTML(entry.notes)}</div>` : ''}
       </div>
     `;
+    container.appendChild(row);
+  });
+}
+
+// ---------------- Sales ----------------
+let salesEntries = [];
+
+async function loadSales() {
+  try {
+    const result = JSON.parse(localStorage.getItem('mineiq-sales') || 'null');
+    salesEntries = result ? validRecordArray(result, 'Sales') : [];
+  } catch (e) {
+    salesEntries = [];
+  }
+  renderSales();
+  updateDashboardStats();
+}
+
+function addSalesEntry() {
+  const date = document.getElementById('salesDate').value || todayString();
+  const material = document.getElementById('salesMaterial').value.trim();
+  const tonnage = readNonNegativeNumber('salesTonnage', 'Sales tonnage', { allowZero: false });
+  if (!material) {
+    alert('Please enter the material sold.');
+    return;
+  }
+  if (tonnage === null) return;
+  if (material.length > 200) {
+    alert('Material must be 200 characters or fewer.');
+    return;
+  }
+
+  salesEntries.unshift({ date, material, tonnage });
+  localStorage.setItem('mineiq-sales', JSON.stringify(salesEntries));
+  showSaved();
+  updateDashboardStats();
+  document.getElementById('salesMaterial').value = '';
+  document.getElementById('salesTonnage').value = '';
+  renderSales();
+}
+
+function renderSales() {
+  const container = document.getElementById('salesList');
+  if (!container) return;
+  container.innerHTML = '';
+  if (salesEntries.length === 0) {
+    container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No sales entries yet.</p>';
+    return;
+  }
+  salesEntries.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    row.innerHTML = `<div><strong>${escapeHTML(entry.date)}</strong> — ${escapeHTML(entry.material)}<div class="meta">${escapeHTML(entry.tonnage)} tonnes dispatched</div></div>`;
     container.appendChild(row);
   });
 }
@@ -2573,9 +2705,17 @@ async function loadEquipment() {
 async function addEquipment() {
   const name = document.getElementById('equipName').value.trim();
   const status = document.getElementById('equipStatus').value;
-  const hours = document.getElementById('equipHours').value.trim();
-  const serviceDue = document.getElementById('equipServiceDue').value.trim();
-  if (!name) return;
+  const hours = readNonNegativeNumber('equipHours', 'Running hours', { required: false });
+  const serviceDue = readNonNegativeNumber('equipServiceDue', 'Next service due at', { required: false });
+  if (!name) {
+    alert('Please enter an equipment name or ID.');
+    return;
+  }
+  if ([hours, serviceDue].includes(null)) return;
+  if (name.length > 200) {
+    alert('Equipment name must be 200 characters or fewer.');
+    return;
+  }
   equipment.unshift({ name, status, hours, serviceDue });
   localStorage.setItem('mineiq-equipment', JSON.stringify(equipment));
   showSaved();
@@ -2611,9 +2751,9 @@ function renderEquipment() {
     row.style.display = 'block';
     row.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span>${item.name}</span>
+        <span>${escapeHTML(item.name)}</span>
         <span style="display:flex; gap:6px;">
-          <span class="status-pill ${pillClass}">${item.status}</span>
+          <span class="status-pill ${pillClass}">${escapeHTML(item.status)}</span>
           ${serviceNote}
         </span>
       </div>
@@ -2691,12 +2831,17 @@ async function loadExplosiveRecords() {
 async function addExplosiveRecord() {
   const date = document.getElementById('expDate').value || todayString();
   const type = document.getElementById('expType').value.trim() || 'Unspecified';
-  const qty = document.getElementById('expQty').value || '0';
-  const holes = document.getElementById('expHoles').value || '0';
-  const od = document.getElementById('expOD').value || '0';
-  const safetyFuse = document.getElementById('expSafetyFuse').value || '0';
-  const nonel = document.getElementById('expNonel').value || '0';
-  const notes = document.getElementById('expNotes').value || '';
+  const qty = readNonNegativeNumber('expQty', 'Quantity used', { allowZero: false });
+  const holes = readNonNegativeNumber('expHoles', 'Number of holes');
+  const od = readNonNegativeNumber('expOD', 'OD');
+  const safetyFuse = readNonNegativeNumber('expSafetyFuse', 'Safety fuse');
+  const nonel = readNonNegativeNumber('expNonel', 'Nonel');
+  const notes = document.getElementById('expNotes').value.trim();
+  if ([qty, holes, od, safetyFuse, nonel].includes(null)) return;
+  if (type.length > 100 || notes.length > 2000) {
+    alert('Explosive type must be 100 characters or fewer and notes 2,000 characters or fewer.');
+    return;
+  }
 
   explosiveRecords.unshift({ date, type, qty, holes, od, safetyFuse, nonel, notes });
   localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
@@ -2724,9 +2869,9 @@ function renderExplosiveRecords() {
     row.className = 'list-row';
     row.innerHTML = `
       <div>
-        <strong>${rec.date}</strong> — ${rec.type}, ${rec.qty} kg, ${rec.holes} holes
-        <div class="meta">OD: ${rec.od || '0'} &nbsp;|&nbsp; Safety Fuse: ${rec.safetyFuse || '0'} m &nbsp;|&nbsp; Nonel: ${rec.nonel || '0'}</div>
-        ${rec.notes ? `<div class="meta">${rec.notes}</div>` : ''}
+        <strong>${escapeHTML(rec.date)}</strong> — ${escapeHTML(rec.type)}, ${escapeHTML(rec.qty)} kg, ${escapeHTML(rec.holes)} holes
+        <div class="meta">OD: ${escapeHTML(rec.od || '0')} &nbsp;|&nbsp; Safety Fuse: ${escapeHTML(rec.safetyFuse || '0')} m &nbsp;|&nbsp; Nonel: ${escapeHTML(rec.nonel || '0')}</div>
+        ${rec.notes ? `<div class="meta">${escapeHTML(rec.notes)}</div>` : ''}
       </div>
     `;
     container.appendChild(row);
@@ -2778,10 +2923,12 @@ function updateDashboardStats() {
   // Today's production & fuel — pulled from Mine Diary entries matching today's date
   const today = todayString();
   const todayEntry = diaryEntries.find(e => e.date === today);
-  document.getElementById('statProduction').innerHTML =
-    (todayEntry ? todayEntry.production : 0) + '<span class="unit">T</span>';
-  document.getElementById('statFuel').innerHTML =
-    (todayEntry ? todayEntry.fuel : 0) + '<span class="unit">L</span>';
+  const todaysSales = salesEntries
+    .filter(e => e.date === today)
+    .reduce((total, e) => total + (parseFloat(e.tonnage) || 0), 0);
+  setDashboardStat('statProduction', todayEntry ? todayEntry.production : 0, 'T');
+  setDashboardStat('statFuel', todayEntry ? todayEntry.fuel : 0, 'L');
+  setDashboardStat('statSales', todaysSales, 'T');
 
   // Equipment running — pulled from Equipment Management list
   const totalEquip = equipment.length;
@@ -2799,22 +2946,50 @@ function updateDashboardStats() {
   document.getElementById('statSafety').textContent = safetyScore + '%';
 
   renderProductionTrend();
+  renderSalesTrend();
   checkBackupReminder();
+}
+
+function renderSalesTrend() {
+  renderTonnageTrend(
+    'salesTrendBars',
+    salesEntries,
+    'tonnage',
+    'No sales entries yet — add one in Sales to see the trend.'
+  );
+}
+
+function setDashboardStat(elementId, value, unit) {
+  const element = document.getElementById(elementId);
+  element.textContent = String(value);
+  const unitElement = document.createElement('span');
+  unitElement.className = 'unit';
+  unitElement.textContent = unit;
+  element.appendChild(unitElement);
 }
 
 // Renders a simple bar chart of the last 7 diary entries' production (tonnes)
 function renderProductionTrend() {
-  const container = document.getElementById('trendBars');
+  renderTonnageTrend(
+    'trendBars',
+    diaryEntries,
+    'production',
+    'No diary entries yet — add one in Mine Diary to see the trend.'
+  );
+}
+
+function renderTonnageTrend(containerId, entries, valueKey, emptyMessage) {
+  const container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = '';
-  const recent = diaryEntries.slice().sort((a, b) => a.date.localeCompare(b.date)).slice(-7);
+  const recent = entries.slice().sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))).slice(-7);
   if (recent.length === 0) {
-    container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No diary entries yet — add one in Mine Diary to see the trend.</p>';
+    container.innerHTML = `<p style="color:var(--slate-500); font-size:13px;">${emptyMessage}</p>`;
     return;
   }
-  const maxVal = Math.max(...recent.map(e => parseFloat(e.production) || 0), 1);
+  const maxVal = Math.max(...recent.map(e => parseFloat(e[valueKey]) || 0), 1);
   recent.forEach(entry => {
-    const val = parseFloat(entry.production) || 0;
+    const val = parseFloat(entry[valueKey]) || 0;
     // Scaled to 85% max so the value label always has headroom above the bar,
     // even when this entry is the tallest (or only) one in the set.
     const heightPct = Math.max((val / maxVal) * 85, 2);
@@ -2824,7 +2999,7 @@ function renderProductionTrend() {
     col.innerHTML = `
       <div class="bar-value">${val}</div>
       <div class="bar" style="height:${heightPct}%;"></div>
-      <div class="bar-label">${entry.date.slice(5)}</div>
+      <div class="bar-label">${escapeHTML(String(entry.date || '').slice(5))}</div>
     `;
     container.appendChild(col);
   });
@@ -2844,7 +3019,7 @@ function checkBackupReminder() {
   }
 
   const lastExport = localStorage.getItem('mineiq-last-export');
-  const hasAnyData = diaryEntries.length > 0 || equipment.length > 0 || explosiveRecords.length > 0;
+  const hasAnyData = diaryEntries.length > 0 || salesEntries.length > 0 || equipment.length > 0 || explosiveRecords.length > 0;
   if (!hasAnyData) {
     banner.style.display = 'none';
     return;
@@ -3005,6 +3180,32 @@ function generateDailyReport() {
   }
   y += 6;
 
+  // --- Sales for today ---
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text("Today's Sales", 14, y);
+  y += 8;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  const todaysSales = salesEntries.filter(entry => entry.date === today);
+  if (todaysSales.length === 0) {
+    doc.text('No sales recorded today.', 14, y);
+    y += 7;
+  } else {
+    let totalSales = 0;
+    todaysSales.forEach(entry => {
+      const tonnage = parseFloat(entry.tonnage) || 0;
+      totalSales += tonnage;
+      doc.text(`- ${entry.material}: ${tonnage} tonnes`, 14, y);
+      y += 7;
+      if (y > 270) { doc.addPage(); y = 20; }
+    });
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total Sales: ${totalSales.toFixed(1)} T`, 14, y);
+    doc.setFont('helvetica', 'normal');
+    y += 12;
+  }
+
   // --- Explosive records for today ---
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
@@ -3041,6 +3242,7 @@ function generateWeeklyReport() {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 7);
   const recent = diaryEntries.filter(e => new Date(e.date) >= cutoff);
+  const recentSales = salesEntries.filter(e => new Date(e.date) >= cutoff);
 
   doc.setFontSize(11);
   if (recent.length === 0) {
@@ -3058,6 +3260,19 @@ function generateWeeklyReport() {
     doc.setFont('helvetica', 'bold');
     doc.text(`Total Production: ${totalProduction.toFixed(1)} T`, 14, y); y += 7;
     doc.text(`Total Fuel Used: ${totalFuel.toFixed(1)} L`, 14, y);
+  }
+
+  y += 12;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Sales Summary', 14, y); y += 8;
+  doc.setFont('helvetica', 'normal');
+  if (recentSales.length === 0) {
+    doc.text('No sales entries in the last 7 days.', 14, y);
+  } else {
+    let totalSales = 0;
+    recentSales.forEach(entry => { totalSales += parseFloat(entry.tonnage) || 0; });
+    doc.text(`Total Sales: ${totalSales.toFixed(1)} T`, 14, y); y += 7;
+    doc.text(`Sales Entries: ${recentSales.length}`, 14, y);
   }
 
   finalizeReport(doc, `MineIQ_Weekly_Report_${todayString()}.pdf`);
@@ -3079,6 +3294,10 @@ function generateMonthlyReport() {
     const d = new Date(e.date);
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
   });
+  const monthSales = salesEntries.filter(e => {
+    const d = new Date(e.date);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
 
   doc.setFontSize(11);
   if (monthEntries.length === 0) {
@@ -3097,6 +3316,18 @@ function generateMonthlyReport() {
     doc.text(`Total Production: ${totalProduction.toFixed(1)} T`, 14, y); y += 7;
     doc.text(`Total Fuel Used: ${totalFuel.toFixed(1)} L`, 14, y); y += 7;
     doc.text(`Days Logged: ${monthEntries.length}`, 14, y);
+  }
+
+  y += 12;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Sales Summary', 14, y); y += 8;
+  doc.setFont('helvetica', 'normal');
+  if (monthSales.length === 0) {
+    doc.text('No sales entries logged this month.', 14, y);
+  } else {
+    const totalSales = monthSales.reduce((total, entry) => total + (parseFloat(entry.tonnage) || 0), 0);
+    doc.text(`Total Sales: ${totalSales.toFixed(1)} T`, 14, y); y += 7;
+    doc.text(`Sales Entries: ${monthSales.length}`, 14, y);
   }
 
   finalizeReport(doc, `MineIQ_Monthly_Report_${todayString()}.pdf`);
@@ -3242,6 +3473,7 @@ function exportData() {
     weeklyChecklist: weeklyChecklist,
     monthlyChecklist: monthlyChecklist,
     diaryEntries: diaryEntries,
+    salesEntries: salesEntries,
     equipment: equipment,
     explosiveRecords: explosiveRecords,
     incidents: incidents
@@ -3266,27 +3498,31 @@ function importData(event) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Backup is not an object.');
       const confirmMsg = 'This will replace your current data on this device with the backup file. Continue?';
       if (!confirm(confirmMsg)) return;
 
-      checklist = data.checklist || defaultChecklist;
-      weeklyChecklist = data.weeklyChecklist || defaultWeeklyChecklist;
-      monthlyChecklist = data.monthlyChecklist || defaultMonthlyChecklist;
-      diaryEntries = data.diaryEntries || [];
-      equipment = data.equipment || [];
-      explosiveRecords = data.explosiveRecords || [];
-      incidents = data.incidents || [];
+      checklist = data.checklist ? validRecordArray(data.checklist, 'Checklist') : defaultChecklist;
+      weeklyChecklist = data.weeklyChecklist ? validRecordArray(data.weeklyChecklist, 'Weekly checklist') : defaultWeeklyChecklist;
+      monthlyChecklist = data.monthlyChecklist ? validRecordArray(data.monthlyChecklist, 'Monthly checklist') : defaultMonthlyChecklist;
+      diaryEntries = data.diaryEntries ? validRecordArray(data.diaryEntries, 'Diary') : [];
+      salesEntries = data.salesEntries ? validRecordArray(data.salesEntries, 'Sales') : [];
+      equipment = data.equipment ? validRecordArray(data.equipment, 'Equipment') : [];
+      explosiveRecords = data.explosiveRecords ? validRecordArray(data.explosiveRecords, 'Explosive records') : [];
+      incidents = data.incidents ? validRecordArray(data.incidents, 'Incidents') : [];
 
       localStorage.setItem('mineiq-checklist', JSON.stringify(checklist));
       localStorage.setItem('mineiq-checklist-weekly', JSON.stringify(weeklyChecklist));
       localStorage.setItem('mineiq-checklist-monthly', JSON.stringify(monthlyChecklist));
       localStorage.setItem('mineiq-diary', JSON.stringify(diaryEntries));
+      localStorage.setItem('mineiq-sales', JSON.stringify(salesEntries));
       localStorage.setItem('mineiq-equipment', JSON.stringify(equipment));
       localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
       localStorage.setItem('mineiq-incidents', JSON.stringify(incidents));
 
       renderChecklist();
       renderDiary();
+      renderSales();
       renderEquipment();
       renderExplosiveRecords();
       renderIncidents();
@@ -3347,6 +3583,7 @@ if (isFileProtocol) {
 loadChecklist();
 loadIncidents();
 loadDiary();
+loadSales();
 loadEquipment();
 loadExplosiveRecords();
 loadWeather();
