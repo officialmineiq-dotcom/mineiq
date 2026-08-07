@@ -54,6 +54,8 @@
     --slate-100: #eef1f2;
     --safety-orange: #d9622b;
     --safety-orange-dim: #b8501f;
+    --safety-yellow: #f5c400;
+    --safety-yellow-dim: #d9ac00;
     --ok-green: #4c8c5c;
     --blue: #3a6ea5;
     --purple: #6b5b95;
@@ -103,9 +105,9 @@
     display: none;
     align-items: center;
     gap: 8px;
-    background: var(--safety-orange);
+    background: #FFC72C;
     border: none;
-    color: #fff;
+    color: #1a1a1a;
     padding: 11px 20px;
     border-radius: 4px;
     cursor: pointer;
@@ -115,10 +117,12 @@
     box-shadow: 0 3px 10px rgba(0,0,0,0.18);
     transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   }
-  #backBtn:hover { background: var(--safety-orange-dim); box-shadow: 0 4px 14px rgba(0,0,0,0.24); transform: translateY(-1px); }
+  #backBtn:hover { background: #FFB800; box-shadow: 0 4px 14px rgba(0,0,0,0.24); transform: translateY(-1px); }
   #backBtn:active { transform: translateY(0) scale(0.97); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
   @media (max-width: 560px) {
     #backBtn { padding: 10px 14px; font-size: 13px; }
+    header .brand-text { flex-wrap: wrap; align-items: flex-start; }
+    header .tag { font-size: 10px; }
   }
 
   main {
@@ -501,132 +505,6 @@
     cursor: pointer;
   }
 
-  /* ---------- Onboarding / Quick Start Guide ---------- */
-  .onboarding-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(20,24,28,0.6);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .onboarding-overlay.show { display: flex; }
-  .onboarding-box {
-    background: white;
-    border-radius: 6px;
-    max-width: 440px;
-    width: 100%;
-    max-height: 92vh;
-    overflow-y: auto;
-    padding: 28px 26px 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-    border-top: 4px solid var(--safety-orange);
-  }
-  .onboarding-header { text-align: center; margin-bottom: 18px; }
-  .onboarding-wave { font-size: 30px; margin-bottom: 4px; }
-  .onboarding-title {
-    font-family: var(--font-display);
-    font-size: 21px;
-    margin: 0 0 6px;
-    color: var(--slate-900);
-  }
-  .onboarding-subtitle {
-    font-size: 13px;
-    color: var(--slate-500);
-    margin: 0;
-    line-height: 1.4;
-  }
-  .onboarding-dots {
-    display: flex;
-    justify-content: center;
-    gap: 7px;
-    margin: 4px 0 20px;
-  }
-  .onboarding-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--slate-300);
-    transition: background 0.2s, transform 0.2s;
-  }
-  .onboarding-dot.active {
-    background: var(--safety-orange);
-    transform: scale(1.2);
-  }
-  .onboarding-step-icon {
-    font-size: 36px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  .onboarding-step-title {
-    font-family: var(--font-display);
-    font-size: 18px;
-    text-align: center;
-    margin: 0 0 8px;
-    color: var(--slate-900);
-  }
-  .onboarding-step-desc {
-    font-size: 13.5px;
-    line-height: 1.6;
-    color: var(--slate-700);
-    text-align: center;
-    margin: 0 0 20px;
-  }
-  .onboarding-cta {
-    display: block;
-    width: 100%;
-    background: var(--safety-orange);
-    color: white;
-    border: none;
-    padding: 13px 16px;
-    border-radius: 3px;
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 22px;
-  }
-  .onboarding-cta:hover { background: var(--safety-orange-dim); }
-  .onboarding-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    border-top: 1px solid var(--slate-100);
-    padding-top: 16px;
-  }
-  .onboarding-nav .btn-ghost {
-    padding: 9px 14px;
-    font-size: 12.5px;
-  }
-  .onboarding-skip {
-    background: transparent;
-    border: none;
-    color: var(--slate-500);
-    font-size: 12.5px;
-    font-family: var(--font-body);
-    cursor: pointer;
-    text-decoration: underline;
-    padding: 9px 4px;
-  }
-  .onboarding-skip:hover { color: var(--slate-800); }
-  .onboarding-nav button.action {
-    padding: 9px 18px;
-    font-size: 12.5px;
-  }
-  @media (max-width: 480px) {
-    .onboarding-box { padding: 22px 18px 18px; max-height: 88vh; }
-    .onboarding-title { font-size: 19px; }
-    .onboarding-step-icon { font-size: 32px; }
-    .onboarding-step-title { font-size: 16.5px; }
-    .onboarding-nav { flex-wrap: wrap; }
-    .onboarding-nav .btn-ghost,
-    .onboarding-nav button.action { flex: 1; text-align: center; }
-    .onboarding-skip { width: 100%; order: 3; text-align: center; }
-  }
-
   /* ---------- About / Privacy Policy ---------- */
   .policy-text h3 {
     font-family: var(--font-display);
@@ -1005,7 +883,6 @@
     <div class="brand-text">
       <h1>MineIQ</h1>
       <span class="tag">Mining Engineer's Digital Assistant</span>
-      <div class="brand-company" id="brandCompanyName"></div>
     </div>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
@@ -1171,6 +1048,9 @@
         <button class="btn-ghost" onclick="clearCalcFields(['stripWaste','stripOre'], 'stripResult')">Clear</button>
       </div>
       <div class="result-box" id="stripResult"></div>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:10px;">
+        ⚠️ Both values must use the same basis — either both in m³ (bank cubic metres) or both in tonnes. Mixing units gives a meaningless ratio.
+      </p>
     </div>
 
     <div class="card">
@@ -1203,10 +1083,15 @@
           <input type="text" inputmode="decimal" id="pfExplosive" placeholder="e.g. 320">
         </div>
         <div>
-          <label>Rock Broken (m³ or tonnes)</label>
+          <label>Rock Broken</label>
           <input type="text" inputmode="decimal" id="pfRock" placeholder="e.g. 1200">
         </div>
       </div>
+      <label>Rock Quantity Unit</label>
+      <select id="pfRockUnit">
+        <option value="tonnes">Tonnes (t)</option>
+        <option value="m3">Cubic Metres (m³)</option>
+      </select>
       <div style="display:flex; gap:10px;">
         <button class="action" onclick="calcPowderFactor()">Calculate</button>
         <button class="btn-ghost" onclick="clearCalcFields(['pfExplosive','pfRock'], 'pfResult')">Clear</button>
@@ -1890,9 +1775,19 @@
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--font-display); margin-top:0;">📖 Quick Start Guide</h3>
-      <p style="font-size:12px; color:var(--slate-500); margin-top:-6px;">Revisit the welcome walkthrough covering Settings, Mine Diary, Calculators, and the Dashboard.</p>
-      <button class="btn-ghost" onclick="openOnboarding()">📖 Reopen Quick Start Guide</button>
+      <h3 style="font-family:var(--font-display); margin-top:0;">📍 Mine Location</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:-6px;">Used to fetch local weather on the Dashboard. Enter your quarry/mine's coordinates.</p>
+      <div class="form-row">
+        <div>
+          <label>Latitude</label>
+          <input type="text" inputmode="decimal" id="mineLatInput" placeholder="e.g. 10.5276">
+        </div>
+        <div>
+          <label>Longitude</label>
+          <input type="text" inputmode="decimal" id="mineLonInput" placeholder="e.g. 76.2144">
+        </div>
+      </div>
+      <button class="action" onclick="saveMineLocation()">Save Location</button>
     </div>
   </div>
 
@@ -1927,26 +1822,6 @@
 </div>
 
 <div class="save-indicator" id="saveIndicator">Saved</div>
-
-<div class="onboarding-overlay" id="onboardingOverlay">
-  <div class="onboarding-box">
-    <div class="onboarding-header">
-      <div class="onboarding-wave">👋</div>
-      <h2 class="onboarding-title">Welcome to MineIQ</h2>
-      <p class="onboarding-subtitle">Your mining productivity and management companion.</p>
-    </div>
-    <div class="onboarding-dots" id="onboardingDots"></div>
-    <div class="onboarding-step-icon" id="onboardingStepIcon"></div>
-    <h3 class="onboarding-step-title" id="onboardingStepTitle"></h3>
-    <p class="onboarding-step-desc" id="onboardingStepDesc"></p>
-    <button class="onboarding-cta" id="onboardingCtaBtn" onclick="onboardingCtaClick()"></button>
-    <div class="onboarding-nav">
-      <button class="btn-ghost" id="onboardingBackBtn" onclick="onboardingBack()">Back</button>
-      <button class="onboarding-skip" onclick="onboardingSkip()">Skip for now</button>
-      <button class="action" id="onboardingNextBtn" onclick="onboardingNext()">Next</button>
-    </div>
-  </div>
-</div>
 </div>
 
 <script>
@@ -2105,7 +1980,7 @@ function handleGuestLogin() {
   } catch (e) {}
   currentCloudUser = null;
 
-  showWelcomeAndEnter('Guest User');
+  showWelcomeAndEnter('Guest User', true);
 }
 
 function handleLogout() {
@@ -2124,10 +1999,14 @@ function handleLogout() {
   document.getElementById('authScreen').style.display = 'flex';
 }
 
-function showWelcomeAndEnter(name) {
+function showWelcomeAndEnter(name, isGuest) {
   try {
     localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('guestMode', 'false');
+    // Only clear guestMode for real (Google/Email) sign-ins. Guest logins
+    // pass isGuest=true and must keep guestMode='true' so the rest of the
+    // app (badge, profile menu, guardPremiumFeature) keeps recognizing them
+    // as a guest for the whole session.
+    localStorage.setItem('guestMode', isGuest ? 'true' : 'false');
     localStorage.setItem('userName', name);
   } catch (e) {}
 
@@ -2140,96 +2019,7 @@ function showWelcomeAndEnter(name) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
     renderGuestBadge();
-    maybeShowOnboarding();
   }, 2000);
-}
-
-// ---------------- Onboarding / Quick Start Guide ----------------
-const ONBOARDING_KEY = 'mineiq-onboarding-completed';
-const ONBOARDING_STEPS = [
-  { icon: '⚙️', title: 'Set Up Your Profile', desc: 'Start by adding your company name, engineer name, and designation in Settings. This information can be used in your MineIQ reports.', cta: 'Go to Settings', view: 'settings' },
-  { icon: '📔', title: 'Start Your Mine Diary', desc: 'Record daily production, manpower, fuel usage, and important mine observations.', cta: 'Open Mine Diary', view: 'diary' },
-  { icon: '🧮', title: 'Use MineIQ Tools', desc: 'Explore the mining calculators and productivity tools for drilling, blasting, haulage, dumper payload, cycle time, salary calculations, and other mining calculations already available in the app.', cta: 'Explore Calculators', view: 'calculators' },
-  { icon: '📊', title: 'Track Your Mine', desc: 'Use the Dashboard, Sales, Productivity, Analytics, Equipment Management and Reports to monitor your mine operations and generate reports.', cta: 'Go to Dashboard', view: 'dashboard' }
-];
-let onboardingStepIndex = 0;
-
-// Shows the guide automatically only for a first-time visit on this device
-// (i.e. it hasn't been completed/skipped before) and only once the user is
-// actually inside the app (logged in or guest).
-function maybeShowOnboarding() {
-  try {
-    if (localStorage.getItem(ONBOARDING_KEY) === 'true') return;
-    if (localStorage.getItem('isLoggedIn') !== 'true') return;
-  } catch (e) { return; }
-  openOnboarding();
-}
-
-// Opens the guide. Used both for the automatic first-run trigger and for the
-// manual "Quick Start Guide" reopen link in Settings — reopening always works
-// even if mineiq-onboarding-completed is already set.
-function openOnboarding() {
-  onboardingStepIndex = 0;
-  renderOnboardingStep();
-  const overlay = document.getElementById('onboardingOverlay');
-  if (overlay) overlay.classList.add('show');
-}
-
-function closeOnboarding(markComplete) {
-  const overlay = document.getElementById('onboardingOverlay');
-  if (overlay) overlay.classList.remove('show');
-  if (markComplete) {
-    try { localStorage.setItem(ONBOARDING_KEY, 'true'); } catch (e) {}
-  }
-}
-
-function renderOnboardingStep() {
-  const step = ONBOARDING_STEPS[onboardingStepIndex];
-  document.getElementById('onboardingStepIcon').textContent = step.icon;
-  document.getElementById('onboardingStepTitle').textContent = step.title;
-  document.getElementById('onboardingStepDesc').textContent = step.desc;
-  document.getElementById('onboardingCtaBtn').textContent = step.cta;
-
-  const dotsEl = document.getElementById('onboardingDots');
-  dotsEl.innerHTML = ONBOARDING_STEPS.map((s, i) =>
-    `<span class="onboarding-dot${i === onboardingStepIndex ? ' active' : ''}"></span>`
-  ).join('');
-
-  const backBtn = document.getElementById('onboardingBackBtn');
-  backBtn.style.visibility = onboardingStepIndex === 0 ? 'hidden' : 'visible';
-
-  const nextBtn = document.getElementById('onboardingNextBtn');
-  nextBtn.textContent = onboardingStepIndex === ONBOARDING_STEPS.length - 1 ? 'Get Started' : 'Next';
-}
-
-function onboardingNext() {
-  if (onboardingStepIndex < ONBOARDING_STEPS.length - 1) {
-    onboardingStepIndex++;
-    renderOnboardingStep();
-  } else {
-    closeOnboarding(true);
-    showView('dashboard');
-  }
-}
-
-function onboardingBack() {
-  if (onboardingStepIndex > 0) {
-    onboardingStepIndex--;
-    renderOnboardingStep();
-  }
-}
-
-function onboardingSkip() {
-  closeOnboarding(true);
-}
-
-// The per-step highlighted button (e.g. "Go to Settings") both closes the
-// guide and jumps straight to that existing module via the app's normal
-// showView() navigation — no duplicate navigation system.
-function onboardingCtaClick() {
-  const step = ONBOARDING_STEPS[onboardingStepIndex];
-  closeOnboarding(true);
-  showView(step.view);
 }
 
 function renderGuestBadge() {
@@ -2332,7 +2122,6 @@ if (cloudAvailable) {
 // If already logged in, make sure the guest badge reflects saved state
 // immediately (the html.mq-skip-auth CSS already handles which screen shows).
 renderGuestBadge();
-maybeShowOnboarding();
 
 // ---------------- Navigation ----------------
 const views = document.querySelectorAll('.view');
@@ -2395,10 +2184,15 @@ function setCloudStatusText(text, isError) {
 async function syncToCloud() {
   const ref = getUserDocRef();
   if (!ref) return;
+  let companyInfo = null;
+  try { companyInfo = JSON.parse(localStorage.getItem('mineiq-company-info') || 'null'); } catch (e) { companyInfo = null; }
+  let mineLocation = null;
+  try { mineLocation = JSON.parse(localStorage.getItem('mineiq-mine-location') || 'null'); } catch (e) { mineLocation = null; }
   try {
     await ref.set({
       checklist, weeklyChecklist, monthlyChecklist,
       diaryEntries, salesEntries, equipment, explosiveRecords, incidents,
+      companyInfo, mineLocation,
       updatedAt: new Date().toISOString()
     }, { merge: true });
     setCloudStatusText('☁ Synced', false);
@@ -2436,6 +2230,16 @@ async function loadFromCloud() {
       localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
       localStorage.setItem('mineiq-incidents', JSON.stringify(incidents));
 
+      // Older cloud records saved before company info / mine location were
+      // synced won't have these fields — only overwrite local values when
+      // the cloud document actually has real data for them.
+      if (data.companyInfo && typeof data.companyInfo === 'object') {
+        localStorage.setItem('mineiq-company-info', JSON.stringify(data.companyInfo));
+      }
+      if (data.mineLocation && typeof data.mineLocation === 'object') {
+        localStorage.setItem('mineiq-mine-location', JSON.stringify(data.mineLocation));
+      }
+
       renderChecklist();
       renderDiary();
       renderSales();
@@ -2443,6 +2247,9 @@ async function loadFromCloud() {
       renderExplosiveRecords();
       renderIncidents();
       updateDashboardStats();
+      loadCompanyInfo();
+      loadMineLocation();
+      loadWeather();
     } else {
       await syncToCloud();
     }
@@ -2452,6 +2259,14 @@ async function loadFromCloud() {
 }
 
 // ---------------- Mine Calculators ----------------
+// Rounds to a fixed number of decimals using a small epsilon correction so
+// values like 3.105 round to "3.11" instead of falling to "3.10" due to
+// binary floating-point representation (a well-known toFixed() quirk).
+function roundTo(n, decimals) {
+  const factor = Math.pow(10, decimals);
+  return (Math.round((n + Number.EPSILON) * factor) / factor).toFixed(decimals);
+}
+
 // ---------------- Mine Calculators: shared Clear/Reset helper ----------------
 function clearCalcFields(fieldIds, resultId) {
   fieldIds.forEach(id => {
@@ -2469,8 +2284,8 @@ function calcBenchHeight() {
   const top = parseFloat(document.getElementById('benchTop').value);
   const bottom = parseFloat(document.getElementById('benchBottom').value);
   const box = document.getElementById('benchResult');
-  if (isNaN(top) || isNaN(bottom)) {
-    box.textContent = 'Please enter both RL values.';
+  if (!Number.isFinite(top) || !Number.isFinite(bottom)) {
+    box.textContent = 'Please enter valid, finite numbers for both RL values.';
   } else {
     const height = top - bottom;
     if (height < 0) {
@@ -2486,8 +2301,8 @@ function calcStrippingRatio() {
   const waste = parseFloat(document.getElementById('stripWaste').value);
   const ore = parseFloat(document.getElementById('stripOre').value);
   const box = document.getElementById('stripResult');
-  if (isNaN(waste) || isNaN(ore)) {
-    box.textContent = 'Please enter valid waste and ore values.';
+  if (!Number.isFinite(waste) || !Number.isFinite(ore)) {
+    box.textContent = 'Please enter valid, finite waste and ore values.';
   } else if (waste < 0 || ore < 0) {
     box.textContent = 'Waste and Ore values cannot be negative.';
   } else if (ore === 0) {
@@ -2503,8 +2318,8 @@ function calcHaulRoadGradient() {
   const rise = parseFloat(document.getElementById('gradRise').value);
   const run = parseFloat(document.getElementById('gradRun').value);
   const box = document.getElementById('gradResult');
-  if (isNaN(rise) || isNaN(run)) {
-    box.textContent = 'Please enter valid rise and run values.';
+  if (!Number.isFinite(rise) || !Number.isFinite(run)) {
+    box.textContent = 'Please enter valid, finite rise and run values.';
   } else if (run <= 0) {
     box.textContent = 'Horizontal Distance must be greater than zero.';
   } else {
@@ -2524,16 +2339,18 @@ function calcHaulRoadGradient() {
 function calcPowderFactor() {
   const explosive = parseFloat(document.getElementById('pfExplosive').value);
   const rock = parseFloat(document.getElementById('pfRock').value);
+  const unit = document.getElementById('pfRockUnit').value; // 'tonnes' or 'm3'
   const box = document.getElementById('pfResult');
-  if (isNaN(explosive) || isNaN(rock)) {
-    box.textContent = 'Please enter valid explosive quantity and rock volume/tonnage.';
+  if (!Number.isFinite(explosive) || !Number.isFinite(rock)) {
+    box.textContent = 'Please enter valid, finite explosive quantity and rock broken values.';
   } else if (explosive < 0 || rock < 0) {
     box.textContent = 'Values cannot be negative.';
   } else if (rock === 0) {
-    box.textContent = 'Rock volume/tonnage must not be zero (division by zero).';
+    box.textContent = 'Rock broken must not be zero (division by zero).';
   } else {
-    const pf = (explosive / rock).toFixed(3);
-    box.textContent = `Powder Factor = ${pf} kg per unit (m³ or tonne, matching your input)`;
+    const pf = (explosive / rock).toFixed(4);
+    const unitLabel = unit === 'm3' ? 'kg/m³' : 'kg/t';
+    box.textContent = `Powder Factor = ${pf} ${unitLabel}`;
   }
   box.classList.add('show');
 }
@@ -2546,13 +2363,13 @@ function calcRockBlastedMC() {
   const height = parseFloat(document.getElementById('mcRbHeight').value);
   const box = document.getElementById('mcRbResult');
 
-  if ([holes, burden, spacing, density, height].some(isNaN)) {
-    box.textContent = 'Please fill in all five fields with valid numbers.';
+  if ([holes, burden, spacing, density, height].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all five fields with valid, finite numbers.';
   } else if ([holes, burden, spacing, density, height].some(v => v <= 0)) {
     box.textContent = 'All values must be greater than zero.';
   } else {
     const rockBlasted = (holes * burden * spacing * density * height).toFixed(2);
-    box.textContent = `Rock Blasted ≈ ${rockBlasted} tonnes`;
+    box.textContent = `Rock Blasted (Estimated) ≈ ${rockBlasted} tonnes`;
   }
   box.classList.add('show');
 }
@@ -2566,15 +2383,15 @@ function calcHaulagePayload() {
   const density = parseFloat(document.getElementById('hpDensity').value);
   const box = document.getElementById('hpPayloadResult');
 
-  if ([cap, buckets, fill, density].some(isNaN)) {
-    box.textContent = 'Please fill in all fields with valid numbers.';
+  if ([cap, buckets, fill, density].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all fields with valid, finite numbers.';
   } else if (cap <= 0 || buckets <= 0 || density <= 0) {
     box.textContent = 'Bucket Capacity, Number of Buckets, and Density must be greater than zero.';
-  } else if (fill < 1 || fill > 100) {
-    box.textContent = 'Fill Factor must be between 1 and 100.';
+  } else if (fill < 0 || fill > 100) {
+    box.textContent = 'Fill Factor must be between 0 and 100.';
   } else {
     const payload = cap * buckets * (fill / 100) * density;
-    box.textContent = `Payload = ${payload.toFixed(2)} Tonnes`;
+    box.textContent = `Estimated Loaded Payload = ${payload.toFixed(2)} Tonnes (not the manufacturer's rated payload)`;
     // Auto-fill this payload into the Production and Fleet calculators below
     document.getElementById('hpProdPayload').value = payload.toFixed(2);
     document.getElementById('hpFleetPayload').value = payload.toFixed(2);
@@ -2591,8 +2408,8 @@ function calcHaulageCycleTime() {
   const box = document.getElementById('hpCycleResult');
 
   const values = [loading, loadedTravel, dumping, returnTravel, delay];
-  if (values.some(isNaN)) {
-    box.textContent = 'Please fill in all five time fields with valid numbers.';
+  if (values.some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all five time fields with valid, finite numbers.';
   } else if (values.some(v => v < 0)) {
     box.textContent = 'Time values cannot be negative.';
   } else {
@@ -2615,8 +2432,8 @@ function calcHaulageProduction() {
   const cycleTime = parseFloat(document.getElementById('hpProdCycleTime').value);
   const box = document.getElementById('hpProdResult');
 
-  if (isNaN(payload) || isNaN(cycleTime)) {
-    box.textContent = 'Please fill in both Payload and Cycle Time.';
+  if (!Number.isFinite(payload) || !Number.isFinite(cycleTime)) {
+    box.textContent = 'Please fill in both Payload and Cycle Time with valid, finite numbers.';
   } else if (payload <= 0) {
     box.textContent = 'Payload must be greater than zero.';
   } else if (cycleTime <= 0) {
@@ -2637,15 +2454,15 @@ function calcFleetProduction() {
   const cycleTime = parseFloat(document.getElementById('hpFleetCycleTime').value);
   const box = document.getElementById('hpFleetResult');
 
-  if ([numDumpers, payload, cycleTime].some(isNaN)) {
-    box.textContent = 'Please fill in all fields with valid numbers.';
+  if ([numDumpers, payload, cycleTime].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all fields with valid, finite numbers.';
   } else if (numDumpers <= 0 || payload <= 0) {
     box.textContent = 'Number of Dumpers and Payload must be greater than zero.';
   } else if (cycleTime <= 0) {
     box.textContent = 'Cycle Time must be greater than zero.';
   } else {
     const fleetProduction = numDumpers * payload * (60 / cycleTime);
-    box.textContent = `Fleet Production = ${fleetProduction.toFixed(2)} Tonnes/Hour`;
+    box.textContent = `Theoretical Fleet Production = ${fleetProduction.toFixed(2)} Tonnes/Hour`;
   }
   box.classList.add('show');
 }
@@ -2656,8 +2473,8 @@ function calcDailyProduction() {
   const efficiency = parseFloat(document.getElementById('hpDailyEfficiency').value);
   const box = document.getElementById('hpDailyResult');
 
-  if ([hourly, hours, efficiency].some(isNaN)) {
-    box.textContent = 'Please fill in all fields with valid numbers.';
+  if ([hourly, hours, efficiency].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all fields with valid, finite numbers.';
   } else if (hourly <= 0 || hours <= 0) {
     box.textContent = 'Hourly Production and Working Hours must be greater than zero.';
   } else if (efficiency < 1 || efficiency > 100) {
@@ -2674,8 +2491,12 @@ function calcVolumeToWeight() {
   const volume = parseFloat(document.getElementById('ucVolume').value);
   const density = parseFloat(document.getElementById('ucDensity').value);
   const box = document.getElementById('ucResult');
-  if (isNaN(volume) || isNaN(density)) {
-    box.textContent = 'Please enter Volume and Density.';
+  if (!Number.isFinite(volume) || !Number.isFinite(density)) {
+    box.textContent = 'Please enter valid, finite Volume and Density values.';
+  } else if (volume < 0) {
+    box.textContent = 'Volume cannot be negative.';
+  } else if (density <= 0) {
+    box.textContent = 'Density must be greater than zero.';
   } else {
     const weight = (volume * density).toFixed(2);
     document.getElementById('ucWeight').value = weight;
@@ -2688,8 +2509,12 @@ function calcWeightToVolume() {
   const weight = parseFloat(document.getElementById('ucWeight').value);
   const density = parseFloat(document.getElementById('ucDensity').value);
   const box = document.getElementById('ucResult');
-  if (isNaN(weight) || isNaN(density) || density === 0) {
-    box.textContent = 'Please enter Weight and a non-zero Density.';
+  if (!Number.isFinite(weight) || !Number.isFinite(density)) {
+    box.textContent = 'Please enter valid, finite Weight and Density values.';
+  } else if (weight < 0) {
+    box.textContent = 'Weight cannot be negative.';
+  } else if (density <= 0) {
+    box.textContent = 'Density must be greater than zero.';
   } else {
     const volume = (weight / density).toFixed(2);
     document.getElementById('ucVolume').value = volume;
@@ -3097,12 +2922,16 @@ function calcBurdenSpacing() {
   const dia = parseFloat(document.getElementById('blastDia').value);
   const factor = parseFloat(document.getElementById('blastFactor').value);
   const box = document.getElementById('blastResult');
-  if (isNaN(dia) || isNaN(factor)) {
-    box.textContent = 'Please enter hole diameter and rock factor.';
+  if (!Number.isFinite(dia) || !Number.isFinite(factor)) {
+    box.textContent = 'Please enter valid, finite Hole Diameter and Rock Factor values.';
+  } else if (dia <= 0 || factor <= 0) {
+    box.textContent = 'Hole Diameter and Rock Factor must be greater than zero.';
   } else {
-    const burden = ((dia * 27 * factor) / 1000).toFixed(2);
-    const spacing = (burden * 1.15).toFixed(2);
-    box.textContent = `Estimated Burden ≈ ${burden} m | Estimated Spacing ≈ ${spacing} m`;
+    const burdenRaw = (dia * 27 * factor) / 1000;
+    const spacingRaw = burdenRaw * 1.15;
+    const burden = roundTo(burdenRaw, 2);
+    const spacing = roundTo(spacingRaw, 2);
+    box.textContent = `Estimated Burden ≈ ${burden} m | Estimated Spacing ≈ ${spacing} m (rule-of-thumb estimate only)`;
   }
   box.classList.add('show');
 }
@@ -3114,15 +2943,24 @@ function calcChargeStemming() {
   const burden = parseFloat(document.getElementById('csBurden').value);
   const box = document.getElementById('csResult');
 
-  if ([diaMm, sg, depth, burden].some(isNaN)) {
-    box.textContent = 'Please fill in all four fields with valid numbers.';
+  if ([diaMm, sg, depth, burden].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all four fields with valid, finite numbers.';
+  } else if (diaMm <= 0 || sg <= 0 || depth <= 0 || burden <= 0) {
+    box.textContent = 'Hole Diameter, Explosive Density, Hole Depth, and Burden must all be greater than zero.';
   } else {
     const diaM = diaMm / 1000;
     const linearCharge = 0.785 * diaM * diaM * sg * 1000; // kg per metre of charge column
     const stemming = 0.7 * burden;
-    const chargeLength = Math.max(depth - stemming, 0);
-    const chargePerHole = linearCharge * chargeLength;
-    box.textContent = `Stemming ≈ ${stemming.toFixed(2)} m | Charge Length ≈ ${chargeLength.toFixed(2)} m | Linear Charge ≈ ${linearCharge.toFixed(2)} kg/m | Explosive per Hole ≈ ${chargePerHole.toFixed(2)} kg`;
+    if (stemming >= depth) {
+      // Do NOT silently clamp this to a zero charge length — a stemming
+      // length that reaches (or exceeds) the hole depth means the inputs
+      // are physically inconsistent and must be corrected by the user.
+      box.textContent = 'Invalid input: stemming length must be less than hole depth.';
+    } else {
+      const chargeLength = depth - stemming;
+      const chargePerHole = linearCharge * chargeLength;
+      box.textContent = `Stemming ≈ ${stemming.toFixed(2)} m | Charge Length ≈ ${chargeLength.toFixed(2)} m | Linear Charge ≈ ${linearCharge.toFixed(2)} kg/m | Explosive per Hole ≈ ${chargePerHole.toFixed(2)} kg (rule-of-thumb estimate only)`;
+    }
   }
   box.classList.add('show');
 }
@@ -3135,11 +2973,13 @@ function calcRockBlasted() {
   const height = parseFloat(document.getElementById('rbHeight').value);
   const box = document.getElementById('rbResult');
 
-  if ([holes, burden, spacing, density, height].some(isNaN)) {
-    box.textContent = 'Please fill in all five fields with valid numbers.';
+  if ([holes, burden, spacing, density, height].some(v => !Number.isFinite(v))) {
+    box.textContent = 'Please fill in all five fields with valid, finite numbers.';
+  } else if ([holes, burden, spacing, density, height].some(v => v <= 0)) {
+    box.textContent = 'All values must be greater than zero.';
   } else {
     const rockBlasted = (holes * burden * spacing * density * height).toFixed(2);
-    box.textContent = `Rock Blasted ≈ ${rockBlasted} tonnes`;
+    box.textContent = `Rock Blasted (Estimated) ≈ ${rockBlasted} tonnes`;
   }
   box.classList.add('show');
 }
@@ -3391,10 +3231,19 @@ function weatherCodeToLabel(code) {
 
 async function loadWeather() {
   const weatherEl = document.getElementById('statWeather');
+  if (!weatherEl) return;
+  let loc = null;
+  try { loc = JSON.parse(localStorage.getItem('mineiq-mine-location') || 'null'); } catch (e) { loc = null; }
+  const hasValidCoords = loc && Number.isFinite(loc.lat) && Number.isFinite(loc.lon) &&
+    loc.lat >= -90 && loc.lat <= 90 && loc.lon >= -180 && loc.lon <= 180;
+  if (!hasValidCoords) {
+    // No mine location saved yet — never silently fall back to a default
+    // location (e.g. Thrissur); tell the user exactly what to do instead.
+    weatherEl.textContent = 'Set mine location in Settings';
+    return;
+  }
   try {
-    // Coordinates set for Thrissur District, Kerala — update lat/lon to your exact quarry location if different
-    const lat = 10.5276, lon = 76.2144;
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current_weather=true`);
     const data = await res.json();
     const temp = Math.round(data.current_weather.temperature);
     const label = weatherCodeToLabel(data.current_weather.weathercode);
@@ -3402,6 +3251,36 @@ async function loadWeather() {
   } catch (e) {
     weatherEl.textContent = 'Unavailable';
   }
+}
+
+// ---------------- Mine Location (Settings) ----------------
+// Saved separately from Company Information so it can be set/updated
+// independently; used only to drive the Dashboard weather widget.
+function loadMineLocation() {
+  let loc = null;
+  try { loc = JSON.parse(localStorage.getItem('mineiq-mine-location') || 'null'); } catch (e) { loc = null; }
+  const latEl = document.getElementById('mineLatInput');
+  const lonEl = document.getElementById('mineLonInput');
+  if (latEl && lonEl && loc) {
+    latEl.value = Number.isFinite(loc.lat) ? loc.lat : '';
+    lonEl.value = Number.isFinite(loc.lon) ? loc.lon : '';
+  }
+}
+
+function saveMineLocation() {
+  const latRaw = document.getElementById('mineLatInput').value.trim();
+  const lonRaw = document.getElementById('mineLonInput').value.trim();
+  const lat = parseFloat(latRaw);
+  const lon = parseFloat(lonRaw);
+  if (latRaw === '' || lonRaw === '' || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+    alert('Please enter valid numeric Latitude and Longitude values.');
+    return;
+  }
+  if (lat < -90 || lat > 90) { alert('Latitude must be between -90 and 90.'); return; }
+  if (lon < -180 || lon > 180) { alert('Longitude must be between -180 and 180.'); return; }
+  localStorage.setItem('mineiq-mine-location', JSON.stringify({ lat, lon }));
+  showSaved();
+  loadWeather();
 }
 
 // ---------------- Company Information (Settings) ----------------
@@ -3903,6 +3782,10 @@ function jumpToFirstMatch() {
 // localStorage never leaves the device it was saved on.
 function exportData() {
   const now = new Date().toISOString();
+  let companyInfo = null;
+  try { companyInfo = JSON.parse(localStorage.getItem('mineiq-company-info') || 'null'); } catch (e) { companyInfo = null; }
+  let mineLocation = null;
+  try { mineLocation = JSON.parse(localStorage.getItem('mineiq-mine-location') || 'null'); } catch (e) { mineLocation = null; }
   const backup = {
     exportedAt: now,
     checklist: checklist,
@@ -3912,7 +3795,9 @@ function exportData() {
     salesEntries: salesEntries,
     equipment: equipment,
     explosiveRecords: explosiveRecords,
-    incidents: incidents
+    incidents: incidents,
+    companyInfo: companyInfo,
+    mineLocation: mineLocation
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -3956,6 +3841,17 @@ function importData(event) {
       localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
       localStorage.setItem('mineiq-incidents', JSON.stringify(incidents));
 
+      // Older backups made before company info / mine location were tracked
+      // won't have these keys — only overwrite when the backup actually
+      // contains a real object, so an old backup can never blank out
+      // company info or mine location that's already saved on this device.
+      if (data.companyInfo && typeof data.companyInfo === 'object') {
+        localStorage.setItem('mineiq-company-info', JSON.stringify(data.companyInfo));
+      }
+      if (data.mineLocation && typeof data.mineLocation === 'object') {
+        localStorage.setItem('mineiq-mine-location', JSON.stringify(data.mineLocation));
+      }
+
       renderChecklist();
       renderDiary();
       renderSales();
@@ -3963,6 +3859,9 @@ function importData(event) {
       renderExplosiveRecords();
       renderIncidents();
       updateDashboardStats();
+      loadCompanyInfo();
+      loadMineLocation();
+      loadWeather();
       showSaved();
       alert('Backup restored successfully.');
     } catch (err) {
@@ -4023,6 +3922,7 @@ loadSales();
 loadEquipment();
 loadExplosiveRecords();
 loadCompanyInfo();
+loadMineLocation();
 loadWeather();
 </script>
 
