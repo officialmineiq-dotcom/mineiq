@@ -501,6 +501,132 @@
     cursor: pointer;
   }
 
+  /* ---------- Onboarding / Quick Start Guide ---------- */
+  .onboarding-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,24,28,0.6);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .onboarding-overlay.show { display: flex; }
+  .onboarding-box {
+    background: white;
+    border-radius: 6px;
+    max-width: 440px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 28px 26px 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    border-top: 4px solid var(--safety-orange);
+  }
+  .onboarding-header { text-align: center; margin-bottom: 18px; }
+  .onboarding-wave { font-size: 30px; margin-bottom: 4px; }
+  .onboarding-title {
+    font-family: var(--font-display);
+    font-size: 21px;
+    margin: 0 0 6px;
+    color: var(--slate-900);
+  }
+  .onboarding-subtitle {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin: 0;
+    line-height: 1.4;
+  }
+  .onboarding-dots {
+    display: flex;
+    justify-content: center;
+    gap: 7px;
+    margin: 4px 0 20px;
+  }
+  .onboarding-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--slate-300);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .onboarding-dot.active {
+    background: var(--safety-orange);
+    transform: scale(1.2);
+  }
+  .onboarding-step-icon {
+    font-size: 36px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .onboarding-step-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    text-align: center;
+    margin: 0 0 8px;
+    color: var(--slate-900);
+  }
+  .onboarding-step-desc {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--slate-700);
+    text-align: center;
+    margin: 0 0 20px;
+  }
+  .onboarding-cta {
+    display: block;
+    width: 100%;
+    background: var(--safety-orange);
+    color: white;
+    border: none;
+    padding: 13px 16px;
+    border-radius: 3px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 22px;
+  }
+  .onboarding-cta:hover { background: var(--safety-orange-dim); }
+  .onboarding-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 16px;
+  }
+  .onboarding-nav .btn-ghost {
+    padding: 9px 14px;
+    font-size: 12.5px;
+  }
+  .onboarding-skip {
+    background: transparent;
+    border: none;
+    color: var(--slate-500);
+    font-size: 12.5px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 9px 4px;
+  }
+  .onboarding-skip:hover { color: var(--slate-800); }
+  .onboarding-nav button.action {
+    padding: 9px 18px;
+    font-size: 12.5px;
+  }
+  @media (max-width: 480px) {
+    .onboarding-box { padding: 22px 18px 18px; max-height: 88vh; }
+    .onboarding-title { font-size: 19px; }
+    .onboarding-step-icon { font-size: 32px; }
+    .onboarding-step-title { font-size: 16.5px; }
+    .onboarding-nav { flex-wrap: wrap; }
+    .onboarding-nav .btn-ghost,
+    .onboarding-nav button.action { flex: 1; text-align: center; }
+    .onboarding-skip { width: 100%; order: 3; text-align: center; }
+  }
+
   /* ---------- About / Privacy Policy ---------- */
   .policy-text h3 {
     font-family: var(--font-display);
@@ -1762,6 +1888,12 @@
         <button class="btn-ghost" id="companyInfoEditBtn" style="display:none;" onclick="editCompanyInfo()">Edit Information</button>
       </div>
     </div>
+
+    <div class="card">
+      <h3 style="font-family:var(--font-display); margin-top:0;">📖 Quick Start Guide</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:-6px;">Revisit the welcome walkthrough covering Settings, Mine Diary, Calculators, and the Dashboard.</p>
+      <button class="btn-ghost" onclick="openOnboarding()">📖 Reopen Quick Start Guide</button>
+    </div>
   </div>
 
 </main>
@@ -1795,6 +1927,26 @@
 </div>
 
 <div class="save-indicator" id="saveIndicator">Saved</div>
+
+<div class="onboarding-overlay" id="onboardingOverlay">
+  <div class="onboarding-box">
+    <div class="onboarding-header">
+      <div class="onboarding-wave">👋</div>
+      <h2 class="onboarding-title">Welcome to MineIQ</h2>
+      <p class="onboarding-subtitle">Your mining productivity and management companion.</p>
+    </div>
+    <div class="onboarding-dots" id="onboardingDots"></div>
+    <div class="onboarding-step-icon" id="onboardingStepIcon"></div>
+    <h3 class="onboarding-step-title" id="onboardingStepTitle"></h3>
+    <p class="onboarding-step-desc" id="onboardingStepDesc"></p>
+    <button class="onboarding-cta" id="onboardingCtaBtn" onclick="onboardingCtaClick()"></button>
+    <div class="onboarding-nav">
+      <button class="btn-ghost" id="onboardingBackBtn" onclick="onboardingBack()">Back</button>
+      <button class="onboarding-skip" onclick="onboardingSkip()">Skip for now</button>
+      <button class="action" id="onboardingNextBtn" onclick="onboardingNext()">Next</button>
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -1988,7 +2140,96 @@ function showWelcomeAndEnter(name) {
     document.getElementById('authScreen').style.display = 'none';
     document.getElementById('appContainer').style.display = 'block';
     renderGuestBadge();
+    maybeShowOnboarding();
   }, 2000);
+}
+
+// ---------------- Onboarding / Quick Start Guide ----------------
+const ONBOARDING_KEY = 'mineiq-onboarding-completed';
+const ONBOARDING_STEPS = [
+  { icon: '⚙️', title: 'Set Up Your Profile', desc: 'Start by adding your company name, engineer name, and designation in Settings. This information can be used in your MineIQ reports.', cta: 'Go to Settings', view: 'settings' },
+  { icon: '📔', title: 'Start Your Mine Diary', desc: 'Record daily production, manpower, fuel usage, and important mine observations.', cta: 'Open Mine Diary', view: 'diary' },
+  { icon: '🧮', title: 'Use MineIQ Tools', desc: 'Explore the mining calculators and productivity tools for drilling, blasting, haulage, dumper payload, cycle time, salary calculations, and other mining calculations already available in the app.', cta: 'Explore Calculators', view: 'calculators' },
+  { icon: '📊', title: 'Track Your Mine', desc: 'Use the Dashboard, Sales, Productivity, Analytics, Equipment Management and Reports to monitor your mine operations and generate reports.', cta: 'Go to Dashboard', view: 'dashboard' }
+];
+let onboardingStepIndex = 0;
+
+// Shows the guide automatically only for a first-time visit on this device
+// (i.e. it hasn't been completed/skipped before) and only once the user is
+// actually inside the app (logged in or guest).
+function maybeShowOnboarding() {
+  try {
+    if (localStorage.getItem(ONBOARDING_KEY) === 'true') return;
+    if (localStorage.getItem('isLoggedIn') !== 'true') return;
+  } catch (e) { return; }
+  openOnboarding();
+}
+
+// Opens the guide. Used both for the automatic first-run trigger and for the
+// manual "Quick Start Guide" reopen link in Settings — reopening always works
+// even if mineiq-onboarding-completed is already set.
+function openOnboarding() {
+  onboardingStepIndex = 0;
+  renderOnboardingStep();
+  const overlay = document.getElementById('onboardingOverlay');
+  if (overlay) overlay.classList.add('show');
+}
+
+function closeOnboarding(markComplete) {
+  const overlay = document.getElementById('onboardingOverlay');
+  if (overlay) overlay.classList.remove('show');
+  if (markComplete) {
+    try { localStorage.setItem(ONBOARDING_KEY, 'true'); } catch (e) {}
+  }
+}
+
+function renderOnboardingStep() {
+  const step = ONBOARDING_STEPS[onboardingStepIndex];
+  document.getElementById('onboardingStepIcon').textContent = step.icon;
+  document.getElementById('onboardingStepTitle').textContent = step.title;
+  document.getElementById('onboardingStepDesc').textContent = step.desc;
+  document.getElementById('onboardingCtaBtn').textContent = step.cta;
+
+  const dotsEl = document.getElementById('onboardingDots');
+  dotsEl.innerHTML = ONBOARDING_STEPS.map((s, i) =>
+    `<span class="onboarding-dot${i === onboardingStepIndex ? ' active' : ''}"></span>`
+  ).join('');
+
+  const backBtn = document.getElementById('onboardingBackBtn');
+  backBtn.style.visibility = onboardingStepIndex === 0 ? 'hidden' : 'visible';
+
+  const nextBtn = document.getElementById('onboardingNextBtn');
+  nextBtn.textContent = onboardingStepIndex === ONBOARDING_STEPS.length - 1 ? 'Get Started' : 'Next';
+}
+
+function onboardingNext() {
+  if (onboardingStepIndex < ONBOARDING_STEPS.length - 1) {
+    onboardingStepIndex++;
+    renderOnboardingStep();
+  } else {
+    closeOnboarding(true);
+    showView('dashboard');
+  }
+}
+
+function onboardingBack() {
+  if (onboardingStepIndex > 0) {
+    onboardingStepIndex--;
+    renderOnboardingStep();
+  }
+}
+
+function onboardingSkip() {
+  closeOnboarding(true);
+}
+
+// The per-step highlighted button (e.g. "Go to Settings") both closes the
+// guide and jumps straight to that existing module via the app's normal
+// showView() navigation — no duplicate navigation system.
+function onboardingCtaClick() {
+  const step = ONBOARDING_STEPS[onboardingStepIndex];
+  closeOnboarding(true);
+  showView(step.view);
 }
 
 function renderGuestBadge() {
@@ -2091,6 +2332,7 @@ if (cloudAvailable) {
 // If already logged in, make sure the guest badge reflects saved state
 // immediately (the html.mq-skip-auth CSS already handles which screen shows).
 renderGuestBadge();
+maybeShowOnboarding();
 
 // ---------------- Navigation ----------------
 const views = document.querySelectorAll('.view');
