@@ -97,19 +97,29 @@
   }
   header h1 { font-family: var(--font-display); font-size: 24px; margin: 0; }
   header .tag { font-family: var(--font-mono); font-size: 11px; color: var(--slate-300); text-transform: uppercase; letter-spacing: 1.5px; }
+  header .brand-company { font-family: var(--font-mono); font-size: 12px; color: var(--safety-orange); letter-spacing: 0.5px; margin-top: 2px; display: none; }
 
   #backBtn {
     display: none;
-    background: transparent;
-    border: 1px solid var(--slate-300);
-    color: var(--slate-100);
-    padding: 8px 14px;
-    border-radius: 2px;
+    align-items: center;
+    gap: 8px;
+    background: var(--safety-orange);
+    border: none;
+    color: #fff;
+    padding: 11px 20px;
+    border-radius: 4px;
     cursor: pointer;
     font-family: var(--font-body);
-    font-size: 13px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   }
-  #backBtn:hover { background: var(--slate-700); }
+  #backBtn:hover { background: var(--safety-orange-dim); box-shadow: 0 4px 14px rgba(0,0,0,0.24); transform: translateY(-1px); }
+  #backBtn:active { transform: translateY(0) scale(0.97); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+  @media (max-width: 560px) {
+    #backBtn { padding: 10px 14px; font-size: 13px; }
+  }
 
   main {
     max-width: 980px;
@@ -269,6 +279,22 @@
   }
   .list-row:last-child { border-bottom: none; }
   .list-row .meta { font-family: var(--font-mono); font-size: 11px; color: var(--slate-500); }
+
+  .entry-delete-btn {
+    background: none;
+    border: 1px solid var(--slate-100);
+    color: #b3261e;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+  .entry-delete-btn:hover { background: #fbe4e2; border-color: #fbe4e2; }
 
   .status-pill {
     font-family: var(--font-mono);
@@ -853,10 +879,11 @@
     <div class="brand-text">
       <h1>MineIQ</h1>
       <span class="tag">Mining Engineer's Digital Assistant</span>
+      <div class="brand-company" id="brandCompanyName"></div>
     </div>
   </div>
   <div style="display:flex; gap:10px; align-items:center;">
-    <button id="backBtn">&larr; Back to Dashboard</button>
+    <button id="backBtn"><span aria-hidden="true">🏠</span> Back to Dashboard</button>
     <div class="profile-menu">
       <button class="profile-avatar-btn" id="profileAvatarBtn" onclick="toggleProfileMenu(event)">?</button>
       <div class="profile-dropdown" id="profileDropdown">
@@ -962,6 +989,11 @@
         <div class="module-title">About</div>
         <div class="module-desc">App version, developer info &amp; privacy policy.</div>
       </div>
+      <div class="module-tile" style="--tile-color:var(--slate-500)" data-view="settings">
+        <div class="module-icon">⚙️</div>
+        <div class="module-title">Settings</div>
+        <div class="module-desc">Company information shown on every generated report.</div>
+      </div>
     </div>
     <div class="card trend-card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Production Trend <span style="font-size:11px; color:var(--slate-500); font-family:var(--font-mono); text-transform:none;">(last 7 diary entries)</span></h3>
@@ -975,7 +1007,7 @@
 
   <!-- MINE CALCULATORS -->
   <div class="view" id="view-calculators">
-    <div class="view-header"><h2>Mine Calculators</h2><span class="badge">Demo</span></div>
+    <div class="view-header"><h2>Mine Calculators</h2></div>
 
     <div class="card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Bench Height Calculator</h3>
@@ -1252,7 +1284,7 @@
 
   <!-- INSPECTIONS -->
   <div class="view" id="view-inspections">
-    <div class="view-header"><h2>DGMS Inspection Companion</h2><span class="badge">Demo</span></div>
+    <div class="view-header"><h2>DGMS Inspection Companion</h2></div>
     <div class="tab-row">
       <button class="tab-btn active" id="checklistTab-daily" onclick="switchChecklistPeriod('daily')">Daily</button>
       <button class="tab-btn" id="checklistTab-weekly" onclick="switchChecklistPeriod('weekly')">Weekly</button>
@@ -1296,7 +1328,7 @@
 
   <!-- MINE DIARY -->
   <div class="view" id="view-diary">
-    <div class="view-header"><h2>Mine Diary</h2><span class="badge">Demo</span></div>
+    <div class="view-header"><h2>Mine Diary</h2></div>
     <div class="card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Add Today's Entry</h3>
       <div class="form-row">
@@ -1356,7 +1388,7 @@
 
   <!-- EQUIPMENT -->
   <div class="view" id="view-equipment">
-    <div class="view-header"><h2>Equipment Management</h2><span class="badge">Demo</span></div>
+    <div class="view-header"><h2>Equipment Management</h2></div>
     <div class="card">
       <h3 style="font-family:var(--font-display); margin-top:0;">Add Equipment</h3>
       <div class="form-row">
@@ -1706,6 +1738,32 @@
     </div>
   </div>
 
+  <!-- SETTINGS -->
+  <div class="view" id="view-settings">
+    <div class="view-header"><h2>Settings</h2></div>
+
+    <div class="card">
+      <h3 style="font-family:var(--font-display); margin-top:0;">🏢 Company Information</h3>
+      <p style="font-size:12px; color:var(--slate-500); margin-top:-6px;">This information will automatically appear on every generated report.</p>
+      <div>
+        <label>Company Name <span style="color:var(--safety-orange-dim);">*</span></label>
+        <input type="text" id="companyNameInput" placeholder="e.g. SPG Granites">
+      </div>
+      <div>
+        <label>Engineer Name <span style="color:var(--safety-orange-dim);">*</span></label>
+        <input type="text" id="engineerNameInput" placeholder="e.g. Madhan">
+      </div>
+      <div>
+        <label>Position / Designation <span style="color:var(--safety-orange-dim);">*</span></label>
+        <input type="text" id="positionInput" placeholder="e.g. Mining Engineer, Manager, Foreman, Second Class Manager">
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="action" id="companyInfoSaveBtn" onclick="saveCompanyInfo()">Save Information</button>
+        <button class="btn-ghost" id="companyInfoEditBtn" style="display:none;" onclick="editCompanyInfo()">Edit Information</button>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <footer>MineIQ — Version 1.0</footer>
@@ -2051,7 +2109,7 @@ backBtn.addEventListener('click', () => showView('dashboard'));
 function showView(name) {
   views.forEach(v => v.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
-  backBtn.style.display = name === 'dashboard' ? 'none' : 'inline-block';
+  backBtn.style.display = name === 'dashboard' ? 'none' : 'inline-flex';
   window.scrollTo(0, 0);
 }
 
@@ -2622,7 +2680,7 @@ function renderDiary() {
     container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No entries yet.</p>';
     return;
   }
-  diaryEntries.forEach(entry => {
+  diaryEntries.forEach((entry, idx) => {
     const row = document.createElement('div');
     row.className = 'list-row';
     row.innerHTML = `
@@ -2630,9 +2688,19 @@ function renderDiary() {
         <strong>${escapeHTML(entry.date)}</strong> — ${escapeHTML(entry.production)} t, ${escapeHTML(entry.manpower)} workers, ${escapeHTML(entry.fuel)} L fuel
         ${entry.notes ? `<div class="meta">${escapeHTML(entry.notes)}</div>` : ''}
       </div>
+      <button type="button" class="entry-delete-btn" onclick="deleteDiaryEntry(${idx})">Delete</button>
     `;
     container.appendChild(row);
   });
+}
+
+function deleteDiaryEntry(idx) {
+  if (!confirm('Delete this diary entry? This cannot be undone.')) return;
+  diaryEntries.splice(idx, 1);
+  localStorage.setItem('mineiq-diary', JSON.stringify(diaryEntries));
+  showSaved();
+  updateDashboardStats();
+  renderDiary();
 }
 
 // ---------------- Sales ----------------
@@ -2680,12 +2748,21 @@ function renderSales() {
     container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No sales entries yet.</p>';
     return;
   }
-  salesEntries.forEach(entry => {
+  salesEntries.forEach((entry, idx) => {
     const row = document.createElement('div');
     row.className = 'list-row';
-    row.innerHTML = `<div><strong>${escapeHTML(entry.date)}</strong> — ${escapeHTML(entry.material)}<div class="meta">${escapeHTML(entry.tonnage)} tonnes dispatched</div></div>`;
+    row.innerHTML = `<div><strong>${escapeHTML(entry.date)}</strong> — ${escapeHTML(entry.material)}<div class="meta">${escapeHTML(entry.tonnage)} tonnes dispatched</div></div><button type="button" class="entry-delete-btn" onclick="deleteSalesEntry(${idx})">Delete</button>`;
     container.appendChild(row);
   });
+}
+
+function deleteSalesEntry(idx) {
+  if (!confirm('Delete this sales entry? This cannot be undone.')) return;
+  salesEntries.splice(idx, 1);
+  localStorage.setItem('mineiq-sales', JSON.stringify(salesEntries));
+  showSaved();
+  updateDashboardStats();
+  renderSales();
 }
 
 // ---------------- Equipment ----------------
@@ -2733,7 +2810,7 @@ function renderEquipment() {
     container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No equipment added yet.</p>';
     return;
   }
-  equipment.forEach(item => {
+  equipment.forEach((item, idx) => {
     const pillClass = item.status === 'Running' ? 'status-ok' : 'status-warn';
     const hours = parseFloat(item.hours);
     const serviceDue = parseFloat(item.serviceDue);
@@ -2752,15 +2829,25 @@ function renderEquipment() {
     row.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span>${escapeHTML(item.name)}</span>
-        <span style="display:flex; gap:6px;">
+        <span style="display:flex; gap:6px; align-items:center;">
           <span class="status-pill ${pillClass}">${escapeHTML(item.status)}</span>
           ${serviceNote}
+          <button type="button" class="entry-delete-btn" style="margin-left:6px;" onclick="deleteEquipment(${idx})">Delete</button>
         </span>
       </div>
       ${!isNaN(hours) ? `<div class="meta">Running hours: ${hours}${!isNaN(serviceDue) ? ' · Next service at ' + serviceDue + 'h' : ''}</div>` : ''}
     `;
     container.appendChild(row);
   });
+}
+
+function deleteEquipment(idx) {
+  if (!confirm('Delete this equipment record? This cannot be undone.')) return;
+  equipment.splice(idx, 1);
+  localStorage.setItem('mineiq-equipment', JSON.stringify(equipment));
+  showSaved();
+  updateDashboardStats();
+  renderEquipment();
 }
 
 // ---------------- Drill & Blast ----------------
@@ -2864,7 +2951,7 @@ function renderExplosiveRecords() {
     container.innerHTML = '<p style="color:var(--slate-500); font-size:13px;">No explosive records yet.</p>';
     return;
   }
-  explosiveRecords.forEach(rec => {
+  explosiveRecords.forEach((rec, idx) => {
     const row = document.createElement('div');
     row.className = 'list-row';
     row.innerHTML = `
@@ -2873,9 +2960,18 @@ function renderExplosiveRecords() {
         <div class="meta">OD: ${escapeHTML(rec.od || '0')} &nbsp;|&nbsp; Safety Fuse: ${escapeHTML(rec.safetyFuse || '0')} m &nbsp;|&nbsp; Nonel: ${escapeHTML(rec.nonel || '0')}</div>
         ${rec.notes ? `<div class="meta">${escapeHTML(rec.notes)}</div>` : ''}
       </div>
+      <button type="button" class="entry-delete-btn" onclick="deleteExplosiveRecord(${idx})">Delete</button>
     `;
     container.appendChild(row);
   });
+}
+
+function deleteExplosiveRecord(idx) {
+  if (!confirm('Delete this explosive record? This cannot be undone.')) return;
+  explosiveRecords.splice(idx, 1);
+  localStorage.setItem('mineiq-explosives', JSON.stringify(explosiveRecords));
+  showSaved();
+  renderExplosiveRecords();
 }
 
 // ---------------- AI Assistant (demo only) ----------------
@@ -3066,24 +3162,122 @@ async function loadWeather() {
   }
 }
 
+// ---------------- Company Information (Settings) ----------------
+// Saved once via the Settings page and reused everywhere: the app header
+// and the header of every generated PDF report.
+function loadCompanyInfo() {
+  let info = null;
+  try { info = JSON.parse(localStorage.getItem('mineiq-company-info') || 'null'); } catch (e) { info = null; }
+  const nameEl = document.getElementById('companyNameInput');
+  const engEl = document.getElementById('engineerNameInput');
+  const posEl = document.getElementById('positionInput');
+  if (nameEl && engEl && posEl) {
+    if (info) {
+      nameEl.value = info.companyName || '';
+      engEl.value = info.engineerName || '';
+      posEl.value = info.position || '';
+      setCompanyFieldsLocked(true);
+    } else {
+      setCompanyFieldsLocked(false);
+    }
+  }
+  updateBrandCompanyName();
+}
+
+function setCompanyFieldsLocked(locked) {
+  ['companyNameInput', 'engineerNameInput', 'positionInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.readOnly = locked;
+  });
+  const saveBtn = document.getElementById('companyInfoSaveBtn');
+  const editBtn = document.getElementById('companyInfoEditBtn');
+  if (saveBtn) saveBtn.style.display = locked ? 'none' : 'inline-block';
+  if (editBtn) editBtn.style.display = locked ? 'inline-block' : 'none';
+}
+
+function saveCompanyInfo() {
+  const companyName = document.getElementById('companyNameInput').value.trim();
+  const engineerName = document.getElementById('engineerNameInput').value.trim();
+  const position = document.getElementById('positionInput').value.trim();
+
+  if (!companyName) { alert('Please enter the company name.'); return; }
+  if (!engineerName) { alert('Please enter the engineer name.'); return; }
+  if (!position) { alert('Please enter the position / designation.'); return; }
+
+  const info = { companyName, engineerName, position };
+  localStorage.setItem('mineiq-company-info', JSON.stringify(info));
+  setCompanyFieldsLocked(true);
+  updateBrandCompanyName();
+  showSaved();
+}
+
+function editCompanyInfo() {
+  setCompanyFieldsLocked(false);
+  const nameEl = document.getElementById('companyNameInput');
+  if (nameEl) nameEl.focus();
+}
+
+function updateBrandCompanyName() {
+  let info = null;
+  try { info = JSON.parse(localStorage.getItem('mineiq-company-info') || 'null'); } catch (e) { info = null; }
+  const el = document.getElementById('brandCompanyName');
+  if (!el) return;
+  if (info && info.companyName) {
+    el.textContent = info.companyName;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 // ---------------- PDF Reports ----------------
 
-// Shared header drawn at the top of every report
+// Shared header drawn at the top of every report — shows the MineIQ logo
+// plus the saved Company Information (falls back to "MineIQ Report" when
+// no company info has been saved yet).
 function drawReportHeader(doc, title) {
+  let companyInfo = null;
+  try { companyInfo = JSON.parse(localStorage.getItem('mineiq-company-info') || 'null'); } catch (e) { companyInfo = null; }
+
+  const logoImg = document.querySelector('.logo-img');
+  let textX = 14;
+  if (logoImg && logoImg.src) {
+    try {
+      doc.addImage(logoImg.src, 'JPEG', 14, 8, 20, 20);
+      textX = 38;
+    } catch (e) { /* logo failed to embed — continue without it */ }
+  }
+
+  let y = 15;
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text('MineIQ', 14, 18);
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  doc.text(title, 14, 26);
-  doc.setFontSize(9);
-  doc.setTextColor(120);
-  doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 32);
-  doc.setTextColor(0);
+  doc.setFontSize(16);
+  if (companyInfo && companyInfo.companyName) {
+    doc.text(companyInfo.companyName, textX, y); y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(title, textX, y); y += 6;
+    doc.setFontSize(9);
+    doc.text(`Engineer Name : ${companyInfo.engineerName}`, textX, y); y += 5;
+    doc.text(`Position : ${companyInfo.position}`, textX, y); y += 5;
+    doc.setTextColor(120);
+    doc.text(`Generated On : ${new Date().toLocaleString()}`, textX, y); y += 5;
+    doc.setTextColor(0);
+  } else {
+    doc.text('MineIQ Report', textX, y); y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(title, textX, y); y += 6;
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Generated on ${new Date().toLocaleString()}`, textX, y); y += 5;
+    doc.setTextColor(0);
+  }
+
+  y = Math.max(y, 30);
   doc.setDrawColor(217, 98, 43); // safety orange line
   doc.setLineWidth(0.8);
-  doc.line(14, 36, 196, 36);
-  return 46; // y-position to start content
+  doc.line(14, y, 196, y);
+  return y + 10; // y-position to start content
 }
 
 // Saves the PDF and, on supporting devices (mostly Android/Chrome), offers the native Share sheet
@@ -3586,6 +3780,7 @@ loadDiary();
 loadSales();
 loadEquipment();
 loadExplosiveRecords();
+loadCompanyInfo();
 loadWeather();
 </script>
 
