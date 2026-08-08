@@ -786,18 +786,20 @@
   }
   .profile-avatar-btn:hover { background: var(--safety-orange-dim); }
   .profile-dropdown {
-    position: absolute;
-    top: 48px;
-    right: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
     background: white;
     color: var(--slate-900);
     border: 1px solid var(--slate-300);
     border-radius: 4px;
     width: 250px;
+    max-width: calc(100vw - 20px);
+    box-sizing: border-box;
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
     padding: 18px;
     display: none;
-    z-index: 200;
+    z-index: 1000;
   }
   .profile-dropdown.show { display: block; }
   .profile-dropdown .pd-avatar {
@@ -2119,8 +2121,49 @@ function renderProfileMenu(isGuest) {
 function toggleProfileMenu(event) {
   if (event) event.stopPropagation();
   const dropdown = document.getElementById('profileDropdown');
-  if (dropdown) dropdown.classList.toggle('show');
+  const btn = document.getElementById('profileAvatarBtn');
+  if (!dropdown) return;
+  if (dropdown.classList.contains('show')) {
+    dropdown.classList.remove('show');
+    return;
+  }
+  dropdown.classList.add('show');
+  positionProfileDropdown(btn, dropdown);
 }
+
+// Keeps the account dropdown fully inside the viewport on any screen size.
+// It anchors under the avatar button by default (right-aligned, matching
+// the previous look), then clamps the left edge so it never runs off
+// either side of a narrow mobile screen, and flips above the button if
+// there isn't room below (e.g. when the Android address bar shrinks the
+// visible viewport height).
+function positionProfileDropdown(btn, dropdown) {
+  if (!btn || !dropdown) return;
+  const margin = 10;
+  const btnRect = btn.getBoundingClientRect();
+  const dropdownWidth = Math.min(dropdown.offsetWidth || 250, window.innerWidth - margin * 2);
+  let left = btnRect.right - dropdownWidth;
+  const maxLeft = window.innerWidth - dropdownWidth - margin;
+  if (left > maxLeft) left = maxLeft;
+  if (left < margin) left = margin;
+  let top = btnRect.bottom + 8;
+  const dropdownHeight = dropdown.offsetHeight || 260;
+  if (top + dropdownHeight > window.innerHeight - margin) {
+    top = Math.max(margin, btnRect.top - dropdownHeight - 8);
+  }
+  dropdown.style.left = left + 'px';
+  dropdown.style.top = top + 'px';
+}
+
+// Re-clamp on resize/orientation change (address bar showing/hiding on
+// Android changes the visible viewport without a page reload).
+window.addEventListener('resize', () => {
+  const dropdown = document.getElementById('profileDropdown');
+  const btn = document.getElementById('profileAvatarBtn');
+  if (dropdown && dropdown.classList.contains('show')) {
+    positionProfileDropdown(btn, dropdown);
+  }
+});
 
 // Closes the profile dropdown when clicking anywhere outside it.
 document.addEventListener('click', (e) => {
