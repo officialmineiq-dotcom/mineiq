@@ -1012,7 +1012,7 @@
       <div class="module-tile" style="--tile-color:var(--slate-500)" data-view="about">
         <div class="module-icon">ℹ️</div>
         <div class="module-title">About</div>
-        <div class="module-desc">App version, developer info &amp; privacy policy.</div>
+        <div class="module-desc">App version, Founder & Developer info &amp; privacy policy.</div>
       </div>
       <div class="module-tile" style="--tile-color:var(--slate-500)" data-view="settings">
         <div class="module-icon">⚙️</div>
@@ -1617,7 +1617,7 @@
           <div class="module-desc">Production, safety score, equipment status &amp; explosive records.</div>
           <div class="report-btn-row">
             <button type="button" class="report-btn" onclick="generateDailyReport()">📄 PDF</button>
-            <button type="button" class="report-btn excel" onclick="generateDailyReportExcel()">📊 Excel</button>
+         <button type="button" class="report-btn excel" onclick="alert('MINEIQ EXCEL BUTTON WORKS'); generateDailyReportExcel()">📊 Excel</button>
           </div>
         </div>
         <div class="module-tile" style="--tile-color:#3a6ea5;">
@@ -1683,8 +1683,8 @@
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--font-display); margin-top:0;">Developer</h3>
-      <p style="font-size:14px; margin:0;">Madhan B E, Mining Engineer</p>
+      <h3 style="font-family:var(--font-display); margin-top:0;">Founder & Developer</h3>
+      <p style="font-size:14px; margin:0;">Madhan (B E, Mining Engineer)</p>
     </div>
 
     <div class="card">
@@ -1880,29 +1880,75 @@ function toggleEmailCard() {
 
 let currentCloudUser = null; // Firebase user object; null when signed out or in guest mode
 
-function handleGoogleLogin() {
-  const note = document.getElementById('googleNote');
-  if (isFileProtocol) {
-    note.textContent = "Google sign-in needs this app hosted online — it can't run when opened directly as a file. Try Guest Mode below for now.";
-    note.classList.add('show');
-    return;
-  }
-  if (!cloudAvailable) {
-    note.textContent = 'Cloud sign-in is unavailable right now — try again later or continue as guest.';
-    note.classList.add('show');
-    return;
-  }
-  const provider = new firebase.auth.GoogleAuthProvider();
-  fbAuth.signInWithPopup(provider)
-    .then(result => {
-      const user = result.user;
-      showWelcomeAndEnter(user.displayName || user.email.split('@')[0]);
-    })
-    .catch(err => {
-      note.textContent = `Google sign-in failed: ${err.message}`;
-      note.classList.add('show');
-      setTimeout(() => note.classList.remove('show'), 5000);
-    });
+async function handleGoogleLogin() {
+    const note = document.getElementById('googleNote');
+
+    if (isFileProtocol) {
+        note.textContent = "Google sign-in needs this app hosted online — it can't run when opened directly as a file. Try Guest Mode below for now.";
+        note.classList.add('show');
+        return;
+    }
+
+    if (!cloudAvailable) {
+        note.textContent = 'Cloud sign-in is unavailable right now — try again later or continue as guest.';
+        note.classList.add('show');
+        return;
+    }
+
+    try {
+        // Android / Capacitor: use native Google Sign-In
+        if (window.Capacitor && window.Capacitor.getPlatform() === 'android') {
+            const FirebaseAuthentication =
+                window.Capacitor.Plugins.FirebaseAuthentication;
+
+            if (!FirebaseAuthentication) {
+                throw new Error('Firebase Authentication plugin is not available.');
+            }
+
+            const result = await FirebaseAuthentication.signInWithGoogle();
+
+            if (!result || !result.credential || !result.credential.idToken) {
+                throw new Error('Google Sign-In did not return a valid ID token.');
+            }
+
+            const credential =
+                firebase.auth.GoogleAuthProvider.credential(
+                    result.credential.idToken
+                );
+
+            const userCredential =
+                await fbAuth.signInWithCredential(credential);
+
+            const user = userCredential.user;
+
+            showWelcomeAndEnter(
+                user.displayName ||
+                (user.email ? user.email.split('@')[0] : 'User')
+            );
+
+            return;
+        }
+
+        // Web browser: keep the existing Firebase popup login
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        const result = await fbAuth.signInWithPopup(provider);
+
+        const user = result.user;
+
+        showWelcomeAndEnter(
+            user.displayName ||
+            (user.email ? user.email.split('@')[0] : 'User')
+        );
+
+    } catch (err) {
+        console.error('Google sign-in error:', err);
+
+        note.textContent = `Google sign-in failed: ${err.message || err}`;
+        note.classList.add('show');
+
+        setTimeout(() => note.classList.remove('show'), 5000);
+    }
 }
 
 function handleEmailLogin() {
@@ -2213,6 +2259,7 @@ renderGuestBadge();
 // ---------------- Navigation ----------------
 const views = document.querySelectorAll('.view');
 const backBtn = document.getElementById('backBtn');
+const navigationHistory = [];
 
 document.querySelectorAll('.module-tile').forEach(tile => {
   // Only wire up navigation for tiles that actually declare a target screen.
@@ -2222,14 +2269,74 @@ document.querySelectorAll('.module-tile').forEach(tile => {
     tile.addEventListener('click', () => showView(tile.dataset.view));
   }
 });
-backBtn.addEventListener('click', () => showView('dashboard'));
+backBtn.addEventListener('click', () => showView('dashboard', { resetHistory: true }));
 
-function showView(name) {
+function getCurrentViewName() {
+  const activeView = document.querySelector('.view.active');
+  return activeView ? activeView.id.replace('view-', '') : 'dashboard';
+}
+
+function showView(name, options = {}) {
+  const { recordHistory = true, resetHistory = false } = options;
+  const targetView = document.getElementById('view-' + name);
+  if (!targetView) {
+    console.error('[MineIQ NAV] Unknown screen requested:', name);
+    return;
+  }
+
+  const currentView = getCurrentViewName();
+  if (resetHistory || name === 'dashboard') {
+    navigationHistory.length = 0;
+  } else if (recordHistory && currentView !== name) {
+    navigationHistory.push(currentView);
+  }
+
   views.forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
+  targetView.classList.add('active');
   backBtn.style.display = name === 'dashboard' ? 'none' : 'inline-flex';
   window.scrollTo(0, 0);
 }
+
+function handleAndroidBackButton() {
+  const currentView = getCurrentViewName();
+  console.log('[MineIQ NAV] Android back pressed');
+  console.log('[MineIQ NAV] Current screen:', currentView);
+
+  if (navigationHistory.length > 0) {
+    const previousView = navigationHistory.pop();
+    console.log('[MineIQ NAV] Returning to previous screen:', previousView);
+    showView(previousView, { recordHistory: false });
+    return;
+  }
+
+  if (currentView !== 'dashboard') {
+    console.log('[MineIQ NAV] Returning to dashboard');
+    showView('dashboard', { recordHistory: false, resetHistory: true });
+    return;
+  }
+
+  console.log('[MineIQ NAV] Dashboard is the root screen; exiting app');
+  const appPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (appPlugin && typeof appPlugin.exitApp === 'function') {
+    appPlugin.exitApp();
+  }
+}
+
+function registerAndroidBackButtonListener() {
+  if (window.__mineiqAndroidBackListenerRegistered) return;
+
+  const appPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (!appPlugin || typeof appPlugin.addListener !== 'function') {
+    console.warn('[MineIQ NAV] Capacitor App plugin is unavailable; Android Back listener was not registered.');
+    return;
+  }
+
+  window.__mineiqAndroidBackListenerRegistered = true;
+  appPlugin.addListener('backButton', handleAndroidBackButton);
+  console.log('[MineIQ NAV] Android Back listener registered');
+}
+
+registerAndroidBackButtonListener();
 
 function showSaved() {
   const el = document.getElementById('saveIndicator');
@@ -3490,6 +3597,27 @@ function drawReportHeader(doc, title) {
 
 // Saves the PDF and, on supporting devices (mostly Android/Chrome), offers the native Share sheet
 async function finalizeReport(doc, filename) {
+  console.log('[MineIQ PDF] finalizeReport STARTED', filename);
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    console.log('[MineIQ PDF] Native Android detected');
+    try {
+      const { Filesystem } = Capacitor.Plugins;
+      const { Share } = Capacitor.Plugins;
+      if (!Filesystem || !Share) throw new Error('Capacitor Filesystem or Share plugin is unavailable.');
+      const pdfData = doc.output('arraybuffer');
+      const base64Data = arrayBufferToBase64(pdfData);
+      console.log('[MineIQ PDF] PDF converted to base64');
+      const savedFile = await Filesystem.writeFile({ path: filename, data: base64Data, directory: 'CACHE' });
+      console.log('[MineIQ PDF] Filesystem write successful', savedFile.uri);
+      console.log('[MineIQ PDF] Share started');
+      await Share.share({ title: filename, text: 'MineIQ PDF Report', url: savedFile.uri, dialogTitle: 'Share MineIQ PDF Report' });
+      console.log('[MineIQ PDF] Share completed');
+    } catch (nativeErr) {
+      console.error('[MineIQ PDF] Native Android export failed:', nativeErr);
+      alert('Unable to share the PDF report. Please try again.');
+    }
+    return;
+  }
   const blob = doc.output('blob');
   const file = new File([blob], filename, { type: 'application/pdf' });
 
@@ -3507,18 +3635,25 @@ async function finalizeReport(doc, filename) {
 // Confirms the PDF library actually loaded before we try to use it —
 // shows a clear message instead of silently doing nothing if it failed.
 function ensureJsPDF() {
+  console.log('[MineIQ PDF] ensureJsPDF STARTED');
+  console.log('[MineIQ PDF] window.jspdf:', window.jspdf);
+  console.log('[MineIQ PDF] jsPDF constructor:', window.jspdf && window.jspdf.jsPDF);
   if (!window.jspdf || !window.jspdf.jsPDF) {
+    console.error('[MineIQ PDF] jsPDF is unavailable.');
     alert('The PDF library did not load. Please check your internet connection, refresh the page (Ctrl+Shift+R), and try again.');
     return false;
   }
+  console.log('[MineIQ PDF] jsPDF available');
   return true;
 }
 
 function generateDailyReport() {
+  console.log('[MineIQ PDF] generateDailyReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Daily Report');
 
   const today = todayString();
@@ -3627,6 +3762,7 @@ function generateDailyReport() {
     });
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Daily_Report_${today}.pdf`);
   } catch (err) {
     alert('Error generating Daily Report: ' + err.message);
@@ -3635,10 +3771,12 @@ function generateDailyReport() {
 }
 
 function generateWeeklyReport() {
+  console.log('[MineIQ PDF] generateWeeklyReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Weekly Report (Last 7 Days)');
 
   const cutoff = new Date();
@@ -3677,6 +3815,7 @@ function generateWeeklyReport() {
     doc.text(`Sales Entries: ${recentSales.length}`, 14, y);
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Weekly_Report_${todayString()}.pdf`);
   } catch (err) {
     alert('Error generating Weekly Report: ' + err.message);
@@ -3685,10 +3824,12 @@ function generateWeeklyReport() {
 }
 
 function generateMonthlyReport() {
+  console.log('[MineIQ PDF] generateMonthlyReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Monthly Report (Current Month)');
 
   const now = new Date();
@@ -3732,6 +3873,7 @@ function generateMonthlyReport() {
     doc.text(`Sales Entries: ${monthSales.length}`, 14, y);
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Monthly_Report_${todayString()}.pdf`);
   } catch (err) {
     alert('Error generating Monthly Report: ' + err.message);
@@ -3740,10 +3882,12 @@ function generateMonthlyReport() {
 }
 
 function generateEquipmentReport() {
+  console.log('[MineIQ PDF] generateEquipmentReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Equipment Report');
 
   doc.setFontSize(11);
@@ -3761,6 +3905,7 @@ function generateEquipmentReport() {
     doc.text(`Running: ${running} / ${equipment.length}`, 14, y);
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Equipment_Report_${todayString()}.pdf`);
   } catch (err) {
     alert('Error generating Equipment Report: ' + err.message);
@@ -3769,10 +3914,12 @@ function generateEquipmentReport() {
 }
 
 function generateInspectionReport() {
+  console.log('[MineIQ PDF] generateInspectionReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Inspection Report');
 
   doc.setFontSize(11);
@@ -3791,6 +3938,7 @@ function generateInspectionReport() {
     doc.text(`Completed: ${done} / ${checklist.length}`, 14, y);
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Inspection_Report_${todayString()}.pdf`);
   } catch (err) {
     alert('Error generating Inspection Report: ' + err.message);
@@ -3799,10 +3947,12 @@ function generateInspectionReport() {
 }
 
 function generateBlastReport() {
+  console.log('[MineIQ PDF] generateBlastReport ENTERED');
   if (!ensureJsPDF()) return;
   try {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  console.log('[MineIQ PDF] PDF object created');
   let y = drawReportHeader(doc, 'Blast Report — Explosive Usage Log');
 
   doc.setFontSize(11);
@@ -3837,6 +3987,7 @@ function generateBlastReport() {
     doc.text(`Total Nonel: ${totalNonel}`, 14, y);
   }
 
+  console.log('[MineIQ PDF] PDF content generated');
   finalizeReport(doc, `MineIQ_Blast_Report_${todayString()}.pdf`);
   } catch (err) {
     alert('Error generating Blast Report: ' + err.message);
@@ -3935,35 +4086,100 @@ function buildExcelSheet(reportTypeLabel, columnHeaders, dataRows, totalsRow) {
 // files (most Android WebViews/Chrome), offers a native share sheet.
 // Falls back to a normal browser download everywhere else, or if the
 // person cancels/declines the share prompt.
-async function downloadOrShareWorkbook(wb, filename) {
-  try {
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array', cellStyles: true });
-    const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const file = new File([blob], filename, { type: blob.type });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: filename });
-        return;
-      } catch (shareErr) {
-        if (shareErr && shareErr.name === 'AbortError') return;
-        // fall through to normal download on any other share failure
-      }
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk);
     }
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (err) {
-    alert('Error generating Excel report: ' + err.message);
-    console.error(err);
-  }
+
+    return btoa(binary);
+}
+async function downloadOrShareWorkbook(wb, filename) {
+    console.log('MINEIQ: downloadOrShareWorkbook STARTED', filename);
+    try {
+        const wbout = XLSX.write(wb, {
+            bookType: 'xlsx',
+            type: 'array',
+            cellStyles: true
+        });
+
+        const blob = new Blob([wbout], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        // Android / Capacitor: use native file sharing
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+            try {
+                const { Filesystem } = Capacitor.Plugins;
+                const { Share } = Capacitor.Plugins;
+
+                const base64Data = arrayBufferToBase64(wbout);
+
+                const savedFile = await Filesystem.writeFile({
+                    path: filename,
+                    data: base64Data,
+                    directory: 'CACHE'
+                });
+
+                await Share.share({
+                    title: filename,
+                    text: 'MineIQ Report',
+                    url: savedFile.uri,
+                    dialogTitle: 'Share MineIQ Report'
+                });
+
+                return;
+            } catch (nativeErr) {
+                console.error('Native Android sharing failed:', nativeErr);
+                alert('Unable to share the Excel report. Please try again.');
+                return;
+            }
+        }
+
+        // Web browser fallback
+        const file = new File([blob], filename, {
+            type: blob.type
+        });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: filename
+                });
+                return;
+            } catch (shareErr) {
+                if (shareErr && shareErr.name === 'AbortError') {
+                    return;
+                }
+            }
+        }
+
+        // Final fallback: download the Excel file
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        a.href = url;
+        a.download = filename;
+
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    } catch (err) {
+        alert('Error generating Excel report: ' + err.message);
+        console.error(err);
+    }
 }
 
 function generateDailyReportExcel() {
+  console.log('MINEIQ: generateDailyReportExcel STARTED');
   if (!ensureXLSX()) return;
   try {
     const wb = XLSX.utils.book_new();
