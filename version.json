@@ -1,8 +1,6 @@
 {
-  "latestVersionCode": 7,
+  "latestVersionCode": 8,
+  "minRequiredVersionCode": 8,
   "latestVersionName": "1.0",
-  "minRequiredVersionCode": 7,
-  "forceUpdate": true,
-  "title": "Update MineIQ",
-  "message": "A new version of MineIQ is available. Update MineIQ - Mining Engineer Digital Assistant to continue."
+  "forceUpdate": true
 }
