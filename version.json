@@ -2,5 +2,5 @@
   "latestVersionCode": 19,
   "minRequiredVersionCode": 19,
   "latestVersionName": "1.0",
-  "forceUpdate": true
+  "forceUpdate": false
 }
