@@ -1,6 +1,6 @@
 {
-  "latestVersionCode": 19,
-  "minRequiredVersionCode": 19,
-  "latestVersionName": "1.0",
-  "forceUpdate": false
+  "latestVersionCode": 24,
+  "minRequiredVersionCode": 24,
+  "latestVersionName": "1.1",
+  "forceUpdate": true
 }
